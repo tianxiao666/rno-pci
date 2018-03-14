@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+ 
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hgicreate.rno.ltestrucanlsservice.mapper.oracle.CommonMapper">
+	<select id="getSpecialLevelAreaByAccount" parameterType="map" resultType="com.hgicreate.rno.ltestrucanlsservice.model.Area">
+		select t.AREA_ID, t.NAME, t.AREA_LEVEL, t.PARENT_ID
+		from (select Distinct sarea.AREA_ID, sarea.NAME, sarea.AREA_LEVEL, sarea.PARENT_ID
+		from SYS_AREA sarea,
+		(select Distinct sora.AREA_ID
+		from SYS_ACCOUNT sa,
+		SYS_USER_RELA_ORG suro,
+		SYS_ORG_RELA_AREA sora
+		where sa.org_user_id = suro.org_user_id
+		and suro.org_id = sora.org_id
+		and suro.Status = 'A'
+		and sa.account = #{account}) tmp
+		start with sarea.area_id = tmp.area_id
+		connect by sarea.area_id = prior sarea.parent_id) t
+		where t.NAME is not null
+		<if test="null != areaLevel and !areaLevel.trim().isEmpty()">
+			and t.AREA_LEVEL = #{areaLevel}
+		</if>
+		<if test="null != parentId and parentId > 0">
+			and t.PARENT_ID = #{parentId}
+		</if>
+	</select>
+
+	<select id="getUserAreaByAccount" parameterType="String" resultType="com.hgicreate.rno.ltestrucanlsservice.model.Area">
+		select sa.Area_Id, sa.Parent_Id
+		from Sys_Area sa, rno_user_config ruc
+		where sa.Area_Id = ruc.Atten_City_Id
+			  and ruc.account = #{account}
+	</select>
+</mapper>

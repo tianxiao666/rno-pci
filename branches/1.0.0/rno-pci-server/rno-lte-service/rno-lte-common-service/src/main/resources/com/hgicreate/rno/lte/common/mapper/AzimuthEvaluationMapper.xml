@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hgicreate.rno.lte.common.mapper.AzimuthEvaluationMapper">
+    <select id="findAzimuthEvalResultsByJobId" resultType="map">
+        SELECT
+        res.job_id,
+        res.cell_id,
+        cell.cell_name,
+        area.name,
+        res.azimuth,
+        res.azimuth1,
+        res.diff,
+        0 as result
+        FROM
+        rno_lte_azimuth_eval_res res,
+        rno_sys_area area,
+        rno_lte_cell cell
+        WHERE
+        res.city_id=area.id
+        AND res.cell_id=cell.cell_id
+        AND res.job_id=#{jobId}
+    </select>
+
+    <select id="findTop1000AzimuthEvalResultsByJobId" resultType="map">
+       SELECT
+           res.job_id,
+           res.cell_id,
+           cell.cell_name,
+           area.name,
+           res.azimuth,
+           res.azimuth1,
+           res.diff,
+           0 as result
+       FROM
+           rno_lte_azimuth_eval_res res,
+           rno_sys_area area,
+           rno_lte_cell cell
+       WHERE
+           res.city_id=area.id
+       AND res.cell_id=cell.cell_id
+       AND res.job_id=#{jobId}
+       LIMIT 1000
+   </select>
+</mapper>
+ 

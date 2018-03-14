@@ -1,0 +1,619 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+ 
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.iscreate.rnointerfermatrix.mapper.spark.SparkMapper">
+
+<select id="queryMrMeaDate" parameterType="map" resultType="string">
+   select distinct(record_time) from test_mr_data where record_time between #{startMeaDay} and #{endMeaDay} and area_id=#{areaId}
+</select>
+<insert id="createMrTempTable" parameterType="map">
+   INSERT INTO test_tmp_mr_data PARTITION(job_id=#{jobId})
+   <foreach collection="meaTime" item="item" index="index" separator="union">
+	  SELECT cell_id,ncell_id,cell_pci,ncell_pci,cell_earfcn,ncell_earfcn FROM test_mr_data WHERE record_time=#{item} and area_id=#{areaId}
+   </foreach>
+</insert>
+
+<select id="queryHoMeaDate" parameterType="map" resultType="string">
+    select distinct(record_date) from test_ho_data where record_date between #{startMeaDay} and #{endMeaDay} and area_id=#{areaId}
+</select>
+<insert id="createHoTempTable" parameterType="map">
+    INSERT INTO test_tmp_ho_data PARTITION(job_id=#{jobId})
+    <foreach collection="meaTime" item="item" index="index" separator="union">
+	   SELECT cell_id,ncell_id,cell_pci,ncell_pci,cell_earfcn,ncell_earfcn FROM test_ho_data WHERE record_date=#{item} and area_id=#{areaId}
+    </foreach>
+</insert>
+
+<select id="querySfMeaDate" parameterType="map" resultType="string">
+    select distinct(record_date) from test_sf_data where record_date between #{startMeaDay} and #{endMeaDay} and area_id=#{areaId}
+</select>
+<insert id="createSfTempTable" parameterType="map">
+    INSERT INTO test_tmp_sf_data PARTITION(job_id=#{jobId})
+    <foreach collection="map" item="item" index="index" separator="union">
+	   SELECT cell_id,ncell_id,cell_pci,ncell_pci,cell_earfcn,ncell_earfcn FROM test_sf_data WHERE record_date=#{item} and area_id=#{areaId}
+    </foreach>
+</insert>
+
+<select id="queryMrCount" parameterType="map" resultType="map">
+    <foreach collection="meaTime" item="item" index="index" separator="union">
+	   SELECT count(record_time) as record_count,record_time as mea_time FROM test_mr_data WHERE record_time=#{item} 
+	   and area_id=#{areaId} GROUP BY record_time
+    </foreach>
+</select>
+<select id="getMrcount" parameterType="map" resultType="int">
+    select count(*) from test_mr_data where record_time between #{beginTime} and #{endTime} and area_id=#{areaId}
+</select>
+
+<select id="queryHoCount" parameterType="map" resultType="map">
+    <foreach collection="meaTime" item="item" index="index" separator="union">
+	   SELECT count(record_date) as record_count,record_date as mea_time FROM test_ho_data WHERE record_date=#{item} 
+	   and area_id=#{areaId} GROUP BY record_date
+    </foreach>
+</select>
+<select id="getHocount" parameterType="map" resultType="int">
+    select count(*) from test_ho_data where record_date between #{beginTime} and #{endTime} and area_id=#{areaId}
+</select>
+
+<select id="querySfCount" parameterType="map" resultType="map">
+    <foreach collection="meaTime" item="item" index="index" separator="union">
+	   SELECT file_id,count(record_date) as record_count,record_date as mea_time FROM test_sf_data WHERE record_date=#{item} 
+	   and area_id=#{areaId} GROUP BY record_date
+    </foreach>
+</select>
+<select id="getSfcount" parameterType="map" resultType="int">
+    select count(*) from test_sf_data where record_date between #{beginTime} and #{endTime} and area_id=#{areaId}
+</select>
+
+<insert id="createMatrix" parameterType="map">
+INSERT
+	INTO
+		TABLE
+			test_inter_matrix PARTITION(
+				job_id =#{jobId}
+			)SELECT
+	cell,
+	ncell,
+	(
+		(
+			CASE
+				WHEN mr_rela > sf_rela THEN mr_rela
+				ELSE sf_rela
+			END
+		)* #{samefreqcellcoefweight} + ho_rela*#{switchratioweight}
+	) AS rela_val,
+	cell_pci,
+	ncell_pci,
+	cell_earfcn,
+	ncell_earfcn,
+	mr_rela,
+	ho_rela,
+	sf_rela
+FROM
+	(
+		SELECT
+			CASE
+				WHEN ISNULL(mrho.cell_id)= TRUE THEN sf.cell_id
+				ELSE mrho.cell_id
+			END AS cell,
+			CASE
+				WHEN ISNULL(mrho.cell_pci)= TRUE THEN sf.cell_pci
+				ELSE mrho.cell_pci
+			END AS cell_pci,
+			CASE
+				WHEN ISNULL(mrho.cell_earfcn)= TRUE THEN sf.cell_earfcn
+				ELSE mrho.cell_earfcn
+			END AS cell_earfcn,
+			CASE
+				WHEN ISNULL(mrho.ncell_id)= TRUE THEN sf.ncell_id
+				ELSE mrho.ncell_id
+			END AS ncell,
+			CASE
+				WHEN ISNULL(mrho.ncell_pci)= TRUE THEN sf.ncell_pci
+				ELSE mrho.ncell_pci
+			END AS ncell_pci,
+			CASE
+				WHEN ISNULL(mrho.ncell_earfcn)= TRUE THEN sf.ncell_earfcn
+				ELSE mrho.ncell_earfcn
+			END AS ncell_earfcn,
+			CASE
+				WHEN ISNULL(mrho.mr_rela)= TRUE THEN 0
+				ELSE mrho.mr_rela
+			END AS mr_rela,
+			CASE
+				WHEN ISNULL(mrho.ho_rela)= TRUE THEN 0
+				ELSE mrho.ho_rela
+			END AS ho_rela,
+			CASE
+				WHEN ISNULL(sf.sf_rela)= TRUE THEN 0
+				ELSE sf.sf_rela
+			END AS sf_rela
+		FROM
+			(
+				SELECT
+					CASE
+						WHEN ISNULL(mr.cell_id)= TRUE THEN ho.cell_id
+						ELSE mr.cell_id
+					END AS cell_id,
+					CASE
+						WHEN ISNULL(mr.cell_pci)= TRUE THEN ho.cell_pci
+						ELSE mr.cell_pci
+					END AS cell_pci,
+					CASE
+						WHEN ISNULL(mr.cell_earfcn)= TRUE THEN ho.cell_earfcn
+						ELSE mr.cell_earfcn
+					END AS cell_earfcn,
+					CASE
+						WHEN ISNULL(mr.ncell_id)= TRUE THEN ho.ncell_id
+						ELSE mr.ncell_id
+					END AS ncell_id,
+					CASE
+						WHEN ISNULL(mr.ncell_pci)= TRUE THEN ho.ncell_pci
+						ELSE mr.ncell_pci
+					END AS ncell_pci,
+					CASE
+						WHEN ISNULL(mr.ncell_earfcn)= TRUE THEN ho.ncell_earfcn
+						ELSE mr.ncell_earfcn
+					END AS ncell_earfcn,
+					mr.mr_rela,
+					ho.ho_rela
+				FROM
+					(
+						(
+							SELECT
+								*
+							FROM
+								(
+									SELECT
+										m.cell_id,
+										m.cell_pci,
+										m.cell_earfcn,
+										m.ncell_id,
+										m.ncell_pci,
+										m.ncell_earfcn,
+										(
+											SELECT
+												SUM( rela )
+											FROM
+												(
+													SELECT
+														cell_id,
+														ncell_id,
+														(
+															rsrptimes1 / totalMixingSum*#{rsrp1weight} +(
+																rsrptimes0 - rsrptimes1
+															)/ totalMixingSum*#{rsrp0minus1weight}
+														)/ thisncellcount AS rela
+													FROM
+														(
+															SELECT
+																m1.cell_id,
+																m1.ncell_id,
+																m1.rsrptimes0,
+																m1.rsrptimes1,
+																(
+																	SELECT
+																		SUM( mixingsum )
+																	FROM
+																		test_mr_data m2
+																	WHERE
+																		m2.cell_id = m1.cell_id
+																		AND m2.ncell_id = m1.ncell_id
+																		AND m2.record_time BETWEEN #{startMeaDay} AND #{endMeaDay}
+																		AND m2.area_id = #{areaId}
+																) AS totalMixingSum,
+																(
+																	SELECT
+																		SUM( timestotal )
+																	FROM
+																		test_mr_data m3
+																	WHERE
+																		m3.cell_id = m1.cell_id
+																		AND m3.record_time BETWEEN #{startMeaDay} AND #{endMeaDay}
+																		AND m3.area_id = #{areaId}
+																) AS sumTimesTotals,
+																(
+																	SELECT
+																		COUNT(*)
+																	FROM
+																		test_mr_data m4
+																	WHERE
+																		m4.cell_id = m1.cell_id
+																		AND m4.ncell_id = m1.ncell_id
+																		AND m4.record_time BETWEEN #{startMeaDay} AND #{endMeaDay}
+																		AND m4.area_id = #{areaId}
+																) AS thisncellcount
+															FROM
+																test_mr_data m1
+															WHERE
+																m1.record_time BETWEEN #{startMeaDay} AND #{endMeaDay}
+																AND m1.distance_km*1000 &lt; #{dislimit}
+																AND m1.area_id = #{areaId}
+														)
+													WHERE
+														totalMixingSum > 0
+														AND sumTimesTotals >= #{minmeasuresum}
+												) m0
+											WHERE
+												m.cell_id = m0.cell_id
+												AND m.ncell_id = m0.ncell_id
+												AND rela >= #{mincorrelation}
+										) AS mr_rela
+									FROM
+										test_tmp_mr_data m
+									WHERE
+									    m.job_id=#{jobId}
+								)
+							WHERE
+								mr_rela IS NOT NULL
+						) mr FULL
+					JOIN(
+							SELECT
+								*
+							FROM
+								(
+									SELECT
+										cell_id,
+										cell_pci,
+										cell_earfcn,
+										ncell_id,
+										ncell_pci,
+										ncell_earfcn,
+										thisncellsumTimes / sumTimes / thisncellcount AS ho_rela
+									FROM
+										(
+											SELECT
+												h1.cell_id,
+												h1.cell_pci,
+												h1.cell_earfcn,
+												h1.ncell_id,
+												h1.ncell_pci,
+												h1.ncell_earfcn,
+												(
+													SELECT
+														SUM( h2.same_earfcn_request )
+													FROM
+														test_ho_data h2
+													WHERE
+														h2.cell_id = h1.cell_id
+														AND h2.record_date BETWEEN #{startMeaDay} AND #{endMeaDay}
+														AND h2.area_id = #{areaId}
+												) AS sumTimes,
+												(
+													SELECT
+														SUM( h3.same_earfcn_request )
+													FROM
+														test_ho_data h3
+													WHERE
+														h3.cell_id = h1.cell_id
+														AND h3.ncell_id = h1.ncell_id
+														AND h3.record_date BETWEEN #{startMeaDay} AND #{endMeaDay}
+														AND h3.area_id = #{areaId}
+												) AS thisncellsumTimes,
+												(
+													SELECT
+														COUNT(*)
+													FROM
+														test_ho_data h4
+													WHERE
+														h4.cell_id = h1.cell_id
+														AND h4.ncell_id = h1.ncell_id
+														AND h4.record_date BETWEEN #{startMeaDay} AND #{endMeaDay}
+														AND h4.area_id = #{areaId}
+												) AS thisncellcount
+											from
+												test_tmp_ho_data h1
+											WHERE
+												h1.job_id=#{jobId}
+										)
+									WHERE
+										sumTimes > 0
+								)
+							WHERE
+								ho_rela > #{mincorrelation}
+						) ho ON
+						mr.cell_id = ho.cell_id
+						AND mr.ncell_id = ho.ncell_id
+					)
+			) mrho FULL
+		JOIN(
+				SELECT
+					*
+				FROM
+					(
+						SELECT
+							s.cell_id,
+							s.cell_pci,
+							s.cell_earfcn,
+							s.ncell_id,
+							s.ncell_pci,
+							s.ncell_earfcn,
+							(
+								SELECT
+									SUM( rela )
+								FROM
+									(
+										SELECT
+											cell_id,
+											ncell_id,
+											(
+												rsrptimes1 / totalMixingSum*#{rsrp1weight} +(
+													rsrptimes0 - rsrptimes1
+												)/ totalMixingSum*#{rsrp0minus1weight}
+											)/ thisncellcount AS rela
+										FROM
+											(
+												SELECT
+													s1.cell_id,
+													s1.ncell_id,
+													s1.rsrptimes0,
+													s1.rsrptimes1,
+													(
+														SELECT
+															SUM( mixingsum )
+														FROM
+															test_sf_data s2
+														WHERE
+															s2.cell_id = s1.cell_id
+															AND s2.ncell_id = s1.ncell_id
+															AND s2.record_date BETWEEN #{startMeaDay} AND #{endMeaDay}
+															AND s2.area_id = #{areaId}
+													) AS totalMixingSum,
+													(
+														SELECT
+															COUNT(*)
+														FROM
+															test_sf_data s3
+														WHERE
+															s3.cell_id = s1.cell_id
+															AND s3.ncell_id = s1.ncell_id
+															AND s3.record_date BETWEEN #{startMeaDay} AND #{endMeaDay}
+															AND s3.area_id = #{areaId}
+													) AS thisncellcount
+												FROM
+													test_sf_data s1
+												WHERE
+													s1.record_date BETWEEN #{startMeaDay} AND #{endMeaDay}
+													AND s1.area_id = #{areaId}
+											)
+										WHERE
+											totalMixingSum > 0
+									) s0
+								WHERE
+									s.cell_id = s0.cell_id
+									AND s.ncell_id = s0.ncell_id
+									AND rela >= #{mincorrelation}
+							) AS sf_rela
+						FROM
+							test_tmp_sf_data s
+						WHERE
+							s.job_id=#{jobId}
+					)
+				WHERE
+					sf_rela IS NOT NULL
+			) sf ON
+			sf.cell_id = mrho.cell_id
+			AND sf.ncell_id = mrho.ncell_id
+	)		
+</insert>
+
+<insert id="createMatrixWithoutSf" parameterType="map">
+INSERT
+	INTO
+		TABLE
+			test_inter_matrix PARTITION(
+				job_id =#{jobId}
+			)SELECT
+	cell,
+	ncell,
+	(
+		mr_rela* #{samefreqcellcoefweight} + ho_rela*#{switchratioweight}
+	) AS rela_val,
+	cell_pci,
+	ncell_pci,
+	cell_earfcn,
+	ncell_earfcn,
+	mr_rela,
+	ho_rela,
+	0
+FROM
+	(
+				SELECT
+					CASE
+						WHEN ISNULL(mr.cell_id)= TRUE THEN ho.cell_id
+						ELSE mr.cell_id
+					END AS cell,
+					CASE
+						WHEN ISNULL(mr.cell_pci)= TRUE THEN ho.cell_pci
+						ELSE mr.cell_pci
+					END AS cell_pci,
+					CASE
+						WHEN ISNULL(mr.cell_earfcn)= TRUE THEN ho.cell_earfcn
+						ELSE mr.cell_earfcn
+					END AS cell_earfcn,
+					CASE
+						WHEN ISNULL(mr.ncell_id)= TRUE THEN ho.ncell_id
+						ELSE mr.ncell_id
+					END AS ncell,
+					CASE
+						WHEN ISNULL(mr.ncell_pci)= TRUE THEN ho.ncell_pci
+						ELSE mr.ncell_pci
+					END AS ncell_pci,
+					CASE
+						WHEN ISNULL(mr.ncell_earfcn)= TRUE THEN ho.ncell_earfcn
+						ELSE mr.ncell_earfcn
+					END AS ncell_earfcn,
+					CASE
+				        WHEN ISNULL(mr.mr_rela)= TRUE THEN 0
+				        ELSE mr.mr_rela
+			        END AS mr_rela,
+			        CASE
+				        WHEN ISNULL(ho.ho_rela)= TRUE THEN 0
+				        ELSE ho.ho_rela
+			        END AS ho_rela
+				FROM
+					(
+						(
+							SELECT
+								*
+							FROM
+								(
+									SELECT
+										m.cell_id,
+										m.cell_pci,
+										m.cell_earfcn,
+										m.ncell_id,
+										m.ncell_pci,
+										m.ncell_earfcn,
+										(
+											SELECT
+												SUM( rela )
+											FROM
+												(
+													SELECT
+														cell_id,
+														ncell_id,
+														(
+															rsrptimes1 / totalMixingSum*#{rsrp1weight} +(
+																rsrptimes0 - rsrptimes1
+															)/ totalMixingSum*#{rsrp0minus1weight}
+														)/ thisncellcount AS rela
+													FROM
+														(
+															SELECT
+																m1.cell_id,
+																m1.ncell_id,
+																m1.rsrptimes0,
+																m1.rsrptimes1,
+																(
+																	SELECT
+																		SUM( mixingsum )
+																	FROM
+																		test_mr_data m2
+																	WHERE
+																		m2.cell_id = m1.cell_id
+																		AND m2.ncell_id = m1.ncell_id
+																		AND m2.record_time BETWEEN #{startMeaDay} AND #{endMeaDay}
+																		AND m2.area_id = #{areaId}
+																) AS totalMixingSum,
+																(
+																	SELECT
+																		SUM( timestotal )
+																	FROM
+																		test_mr_data m3
+																	WHERE
+																		m3.cell_id = m1.cell_id
+																		AND m3.record_time BETWEEN #{startMeaDay} AND #{endMeaDay}
+																		AND m3.area_id = #{areaId}
+																) AS sumTimesTotals,
+																(
+																	SELECT
+																		COUNT(*)
+																	FROM
+																		test_mr_data m4
+																	WHERE
+																		m4.cell_id = m1.cell_id
+																		AND m4.ncell_id = m1.ncell_id
+																		AND m4.record_time BETWEEN #{startMeaDay} AND #{endMeaDay}
+																		AND m4.area_id = #{areaId}
+																) AS thisncellcount
+															FROM
+																test_mr_data m1
+															WHERE
+																m1.record_time BETWEEN #{startMeaDay} AND #{endMeaDay}
+																AND m1.distance_km*1000 &lt; #{dislimit}
+																AND m1.area_id = #{areaId}
+														)
+													WHERE
+														totalMixingSum > 0
+														AND sumTimesTotals >= #{minmeasuresum}
+												) m0
+											WHERE
+												m.cell_id = m0.cell_id
+												AND m.ncell_id = m0.ncell_id
+												AND rela >= #{mincorrelation}
+										) AS mr_rela
+									FROM
+										test_tmp_mr_data m
+									WHERE
+									    m.job_id=#{jobId}
+								)
+							WHERE
+								mr_rela IS NOT NULL
+						) mr FULL
+					JOIN(
+							SELECT
+								*
+							FROM
+								(
+									SELECT
+										cell_id,
+										cell_pci,
+										cell_earfcn,
+										ncell_id,
+										ncell_pci,
+										ncell_earfcn,
+										thisncellsumTimes / sumTimes / thisncellcount AS ho_rela
+									FROM
+										(
+											SELECT
+												h1.cell_id,
+												h1.cell_pci,
+												h1.cell_earfcn,
+												h1.ncell_id,
+												h1.ncell_pci,
+												h1.ncell_earfcn,
+												(
+													SELECT
+														SUM( h2.same_earfcn_request )
+													FROM
+														test_ho_data h2
+													WHERE
+														h2.cell_id = h1.cell_id
+														AND h2.record_date BETWEEN #{startMeaDay} AND #{endMeaDay}
+														AND h2.area_id = #{areaId}
+												) AS sumTimes,
+												(
+													SELECT
+														SUM( h3.same_earfcn_request )
+													FROM
+														test_ho_data h3
+													WHERE
+														h3.cell_id = h1.cell_id
+														AND h3.ncell_id = h1.ncell_id
+														AND h3.record_date BETWEEN #{startMeaDay} AND #{endMeaDay}
+														AND h3.area_id = #{areaId}
+												) AS thisncellsumTimes,
+												(
+													SELECT
+														COUNT(*)
+													FROM
+														test_ho_data h4
+													WHERE
+														h4.cell_id = h1.cell_id
+														AND h4.ncell_id = h1.ncell_id
+														AND h4.record_date BETWEEN #{startMeaDay} AND #{endMeaDay}
+														AND h4.area_id = #{areaId}
+												) AS thisncellcount
+											from
+												test_tmp_ho_data h1
+											WHERE
+												h1.job_id=#{jobId}
+										)
+									WHERE
+										sumTimes > 0
+								)
+							WHERE
+								ho_rela > #{mincorrelation}
+						) ho ON
+						mr.cell_id = ho.cell_id
+						AND mr.ncell_id = ho.ncell_id
+					)
+			)
+</insert>
+
+<select id="downloadMatrix" parameterType="int" resultType="map">
+ select * from test_inter_matrix where job_id=#{jobId}
+</select>
+
+</mapper>

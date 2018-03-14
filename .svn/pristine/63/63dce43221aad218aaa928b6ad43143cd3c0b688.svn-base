@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?>
+ 
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.iscreate.rno.microservice.pci.afp.mapper.oracle.OracleMapper">
+
+<insert id="saveBestPlan" parameterType="java.util.List">
+	insert into rno_ms_pci_best_plan
+	(job_id, cell_id, earfcn, pci, old_inter_val, new_inter_val)
+	<foreach close=")" collection="list" item="item" index="index" open="(" separator="union">
+		select
+		#{item.jobId,jdbcType=NUMERIC},
+		#{item.cellId,jdbcType=VARCHAR},
+		#{item.earfcn,jdbcType=NUMERIC},
+		#{item.pci,jdbcType=NUMERIC},
+		#{item.oldInterVal,jdbcType=DOUBLE},
+		#{item.newInterVal,jdbcType=DOUBLE}
+		from dual
+	</foreach>
+</insert>
+<select id="getBestPlan" parameterType="long" resultType="map">
+   select cell_id, earfcn, pci, old_inter_val, new_inter_val from rno_ms_pci_best_plan where job_id=#{jobId}
+</select>
+
+<insert id="saveMidPlan" parameterType="java.util.List">
+	insert into rno_ms_pci_mid_plan
+	(job_id, plan_num, cell_id, earfcn, pci, old_inter_val, new_inter_val)
+	<foreach close=")" collection="list" item="item" index="index" open="(" separator="union">
+		select
+		#{item.jobId,jdbcType=NUMERIC},
+		#{item.planNum,jdbcType=NUMERIC},
+		#{item.cellId,jdbcType=VARCHAR},
+		#{item.earfcn,jdbcType=NUMERIC},
+		#{item.pci,jdbcType=NUMERIC},
+		#{item.oldInterVal,jdbcType=DOUBLE},
+		#{item.newInterVal,jdbcType=DOUBLE}
+		from dual
+	</foreach>
+</insert>
+<select id="getMidPlanCount" parameterType="long" resultType="int">
+    select count(distinct(plan_num)) from rno_ms_pci_mid_plan where job_id=#{jobId}
+</select>
+<select id="getMidPlanByPlanNum" resultType="map">
+    select cell_id,earfcn,pci,old_inter_val,new_inter_val from rno_ms_pci_mid_plan where job_id=#{jobId} and plan_num=#{planNum}
+</select>
+
+<insert id="saveTopCell" parameterType="java.util.List">
+	insert into rno_ms_pci_top_cell
+	(job_id, plan_num, cell_id, inter_val)
+	<foreach close=")" collection="list" item="item" index="index" open="(" separator="union">
+		select
+		#{item.jobId,jdbcType=NUMERIC},
+		#{item.planNum,jdbcType=NUMERIC},
+		#{item.cellId,jdbcType=VARCHAR},
+		#{item.interVal,jdbcType=NUMERIC}
+		from dual
+	</foreach>
+</insert>
+<select id="getTopCell" resultType="map">
+   select cell_id, inter_val from rno_ms_pci_top_cell where job_id=#{jobId} and plan_num=#{planNum}
+</select>
+
+<insert id="saveNcCheckPlan" parameterType="java.util.List">
+	insert into rno_ms_pci_nc_check_plan
+	(job_id, cell_id, earfcn, pci, old_inter_val, new_inter_val)
+	<foreach close=")" collection="list" item="item" index="index" open="(" separator="union">
+		select
+		#{item.jobId,jdbcType=NUMERIC},
+		#{item.cellId,jdbcType=VARCHAR},
+		#{item.earfcn,jdbcType=NUMERIC},
+		#{item.pci,jdbcType=NUMERIC},
+		#{item.oldInterVal,jdbcType=DOUBLE},
+		#{item.newInterVal,jdbcType=DOUBLE}
+		from dual
+	</foreach>
+</insert>
+<select id="getNcCheckPlan" parameterType="long" resultType="map">
+   select cell_id,earfcn,pci,old_inter_val,new_inter_val from rno_ms_pci_nc_check_plan where job_id=#{jobId}
+</select>
+
+<insert id="saveAssoTable" parameterType="java.util.List">
+	insert into rno_ms_pci_asso
+	(job_id, cell_id, rela_val)
+	<foreach close=")" collection="list" item="item" index="index" open="(" separator="union">
+		select
+		#{item.jobId,jdbcType=NUMERIC},
+		#{item.cellId,jdbcType=VARCHAR},
+		#{item.relaVal,jdbcType=DOUBLE}
+		from dual
+	</foreach>
+</insert>
+<select id="getAssoTable" parameterType="long" resultType="map">
+    select cell_id,rela_val from rno_ms_pci_asso where job_id=#{jobId}
+</select>
+
+<insert id="saveD1Cell" parameterType="java.util.List">
+	insert into rno_ms_pci_d1_cell
+	(job_id, cell_id, earfcn, inter_val)
+	<foreach close=")" collection="list" item="item" index="index" open="(" separator="union">
+		select
+		#{item.jobId,jdbcType=NUMERIC},
+		#{item.cellId,jdbcType=VARCHAR},
+		#{item.earfcn,jdbcType=NUMERIC},
+		#{item.interVal,jdbcType=DOUBLE}
+		from dual
+	</foreach>
+</insert>
+<select id="getD1Cell" parameterType="long" resultType="map">
+  select cell_id, earfcn, inter_val from rno_ms_pci_d1_cell where job_id=#{jobId}
+</select>
+
+<insert id="saveD2Cell" parameterType="java.util.List">
+	insert into rno_ms_pci_d2_cell
+	(job_id, cell_id, earfcn, inter_val)
+	<foreach close=")" collection="list" item="item" index="index" open="(" separator="union">
+		select
+		#{item.jobId,jdbcType=NUMERIC},
+		#{item.cellId,jdbcType=VARCHAR},
+		#{item.earfcn,jdbcType=NUMERIC},
+		#{item.interVal,jdbcType=DOUBLE}
+		from dual
+	</foreach>
+</insert>
+<select id="getD2Cell" parameterType="long" resultType="map">
+  select cell_id, earfcn, inter_val from rno_ms_pci_d2_cell where job_id=#{jobId}
+</select>
+
+</mapper>

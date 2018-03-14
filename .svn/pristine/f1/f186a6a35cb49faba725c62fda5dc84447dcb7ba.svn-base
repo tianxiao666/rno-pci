@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hgicreate.rno.lte.pciafp.mapper.DataMapper">
+    <select id="getLatestMatrixByCityId" parameterType="long" resultType="com.hgicreate.rno.lte.pciafp.model.InterMatrix">
+        select
+            t.cell_id,
+            t.ncell_id,
+            t.rela_val
+        from rno_lte_inter_matrix t
+        where t.rela_val >0
+              AND t.job_id=(select
+                            max(job_id)
+                        from rno_lte_inter_matrix
+                        WHERE area_id=#{cityId}
+                        GROUP BY job_id)
+    </select>
+
+    <select id="getLteCellsByCityId" parameterType="long" resultType="com.hgicreate.rno.lte.pciafp.model.Cell">
+        select
+            t.cell_id AS id,
+            t.cell_name AS name,
+            t.longitude,
+            t.latitude,
+            t.pci,
+            t.earfcn,
+            t.enodeb_id
+        from rno_lte_cell t
+        WHERE t.latitude is not null
+              and t.longitude is not null
+              and t.pci is not null
+              and t.earfcn is not null
+              AND t.area_id=#{cityId}
+        ORDER BY t.enodeb_id
+    </select>
+
+    <select id="getLatestMatrixByCityIdAndCells" resultType="com.hgicreate.rno.lte.pciafp.model.InterMatrix">
+        SELECT
+        t.cell_id,
+        t.ncell_id,
+        t.rela_val
+        FROM rno_lte_inter_matrix t
+        WHERE t.ncell_id IN (
+        SELECT DISTINCT n.ncell_id
+        FROM rno_lte_inter_matrix n
+        WHERE n.cell_id IN
+        <foreach item="item" index="index" collection="cells" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+        AND n.job_id = (
+        SELECT max(j.job_id)
+        FROM rno_lte_inter_matrix j
+        WHERE j.area_id = #{cityId}
+        GROUP BY j.job_id)
+        ) AND t.job_id = (SELECT max(j.job_id)
+        FROM rno_lte_inter_matrix j
+        WHERE j.area_id = #{cityId}
+        GROUP BY j.job_id)
+        UNION DISTINCT
+        SELECT
+        t.cell_id,
+        t.ncell_id,
+        t.rela_val
+        FROM rno_lte_inter_matrix t
+        WHERE t.cell_id IN (
+        SELECT DISTINCT c.cell_id
+        FROM rno_lte_inter_matrix c
+        WHERE c.ncell_id IN
+        <foreach item="item" index="index" collection="cells" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+        AND c.job_id = (
+        SELECT max(j.job_id)
+        FROM rno_lte_inter_matrix j
+        WHERE j.area_id = #{cityId}
+        GROUP BY j.job_id)
+        ) AND t.job_id = (SELECT max(j.job_id)
+        FROM rno_lte_inter_matrix j
+        WHERE j.area_id = #{cityId}
+        GROUP BY j.job_id)
+    </select>
+</mapper>

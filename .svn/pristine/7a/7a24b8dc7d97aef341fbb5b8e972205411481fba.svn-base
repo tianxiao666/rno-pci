@@ -1,0 +1,70 @@
+info:
+  version: @project.version@
+
+server:
+  # default port
+  port: 8090
+spring:
+  application.name: rno-lte-common-service
+  # profile
+  profiles.active: dev
+  # jpa
+  jpa:
+    show-sql: true
+    hibernate:
+      use-new-id-generator-mappings: true
+# eureka config
+eureka:
+  instance:
+    prefer-ip-address: true
+    lease-renewal-interval-in-seconds: 5
+    lease-expiration-duration-in-seconds: 15
+  client:
+    registry-fetch-interval-seconds: 5
+    initial-instance-info-replication-interval-seconds: 5
+    instance-info-replication-interval-seconds: 5
+    eureka-service-url-poll-interval-seconds: 30
+    service-url.default-zone: http://@rno.registry.host@:8761/eureka
+#断路器超时，需与负载均衡超时配合使用，否则将出现多次重复动作
+hystrix.command.default.execution.isolation.thread.timeoutInMilliseconds: 20000
+ribbon:
+  #负载均衡读取超时，应不小于断路器超时
+  ReadTimeout: 3600000
+  #负载均衡连接超时，一般与读取超时相等
+  ConnectTimeout: 3600000
+# After Dalston Release, Feign clients no longer wrap methods in Hystrix commands by default.
+feign.hystrix.enabled: true
+# log
+logging:
+  level:
+    root: warn
+    com.hgicreate.rno.lte.common: info
+
+# RNO setting
+rno:
+  # job
+  job-type-code:
+    azimuth-eval: RNO_LTE_AZIMUTH_EVALUATION
+    struct-anls: RNO_LTE_STRUCT_ANLS
+    pci-afp: RNO_PCI_AFP_PLAN
+    inter-matrix: RNO_LTE_INTERFER_MATRIX
+
+---
+
+spring:
+  profiles: dev
+  # datasource config
+  datasource:
+     url: jdbc:postgresql://192.168.9.66:5432/rno_pci
+     username: rno_pci
+     password: RnoPci@2017
+eureka:
+  instance:
+    metadata-map:
+      zone: test
+# log
+logging:
+  level:
+    root: info
+    com.hgicreate.rno.lte.common: debug
+    com.hgicreate.rno.lte.common.repo: trace

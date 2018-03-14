@@ -1,0 +1,30 @@
+# SERVICE VERSION
+info:
+  version: @project.version@
+
+server:
+#  port: @rno.registry.port@
+  port: 8761
+
+spring:
+  application.name: @project.name@
+  profiles.active: dev
+#  profiles.include: native
+
+eureka:
+  client:
+    register-with-eureka: false
+    fetch-registry: false
+  server:
+    response-cache-update-interval-ms: 5000
+    eviction-interval-timer-in-ms: 5000
+    wait-time-in-ms-when-sync-empty: 0
+
+---
+
+spring:
+  profiles: dev
+
+eureka:
+  environment: 开发环境
+  datacenter: RNO-DEV

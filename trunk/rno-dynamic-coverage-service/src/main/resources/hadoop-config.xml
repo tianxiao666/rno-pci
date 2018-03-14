@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans:beans xmlns="http://www.springframework.org/schema/hadoop"
+	xmlns:beans="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+	  http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+	  http://www.springframework.org/schema/hadoop http://www.springframework.org/schema/hadoop/spring-hadoop.xsd">
+
+	<!-- <context:property-placeholder location="hadoop.properties"/>
+	<context:property-placeholder location="file:E:/gitmsconfig/rno-ms-config-files/hadoop.properties"/> -->
+	<context:property-placeholder />
+	<!-- <context:component-scan base-package="com.iscreate.rnopcievaluate.tool" /> --> 
+	
+	<configuration id="hadoopConfig">
+	    <!-- core -->
+		fs.defaultFS=${fs.defaultFS}
+		hadoop.user.name=${hadoop.user.name}
+		<!-- hbase -->
+		hbase.zookeeper.quorum=${hbase.zookeeper.quorum}
+		<!-- mapred -->
+		mapreduce.framework.name=${mapreduce.framework.name}
+		mapred.remote.os=${mapred.remote.os}
+		mapreduce.app-submission.cross-platform=${mapreduce.app-submission.cross-platform}
+		mapreduce.jobhistory.address=${mapreduce.jobhistory.address}
+		yarn.app.mapreduce.am.staging-dir=${yarn.app.mapreduce.am.staging-dir}
+		mapreduce.application.classpath=${mapreduce.application.classpath}
+		<!-- yarn -->
+		yarn.resourcemanager.hostname=${yarn.resourcemanager.hostname}
+	</configuration>
+</beans:beans>

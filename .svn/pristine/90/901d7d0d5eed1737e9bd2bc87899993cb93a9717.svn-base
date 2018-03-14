@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+ 
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.iscreate.rnointerfermatrix.mapper.oracle.OracleMapper">
+	<!-- 配置映射字段 -->
+	<resultMap type="com.iscreate.rnointerfermatrix.model.RnoDataCollectRec" id="table_rnoMsDataCollectRec">
+		<result property="dataCollectId" column="DATA_COLLECT_ID" />
+		<result property="uploadTime" column="UPLOAD_TIME" />
+		<result property="businessTime" column="BUSINESS_TIME" />
+		<result property="fileName" column="FILE_NAME" />
+		<result property="oriFileName" column="ORI_FILE_NAME" />
+		<result property="account" column="ACCOUNT" />
+		<result property="cityId" column="CITY_ID" />
+		<result property="businessDataType" column="BUSINESS_DATA_TYPE" />
+		<result property="fileSize" column="FILE_SIZE" />
+		<result property="fileStatus" column="FILE_STATUS" />
+		<result property="launchTime" column="LAUNCH_TIME" />
+		<result property="completeTime" column="COMPLETE_TIME"/>
+		<result property="jobId" column="JOB_ID"/>
+	</resultMap>
+	<resultMap type="com.iscreate.rnointerfermatrix.model.Report" id="table_report">
+		<result property="reportId" column="REPORT_ID" />
+		<result property="jobId" column="JOB_ID" />
+		<result property="stage" column="STAGE" />
+		<result property="begTime" column="BEG_TIME" />
+		<result property="endTime" column="END_TIME" />
+		<result property="finishState" column="STATE" />
+		<result property="attMsg" column="ATT_MSG" />
+	</resultMap>
+	<select id="queryUploadDataCnt" parameterType="java.util.Map"
+		resultType="int">
+		<![CDATA[
+		select count(DATA_COLLECT_ID)
+		  from rno_ms_data_collect_rec
+		 where ${fileStatus}
+		 CITY_ID = #{cityId}
+		   and BUSINESS_DATA_TYPE = #{fileCode}
+		   and UPLOAD_TIME >= to_date(#{begUploadDate}, 'yyyy-mm-dd HH24:mi:ss')
+		   and UPLOAD_TIME <= to_date(#{endUploadDate}, 'yyyy-mm-dd HH24:mi:ss')
+		]]>
+	</select>
+	<select id="queryUploadDataByPage" parameterType="java.util.Map"
+		resultMap="table_rnoMsDataCollectRec">
+		<![CDATA[
+		select DATA_COLLECT_ID,
+		       UPLOAD_TIME,
+		       BUSINESS_TIME,
+		       FILE_NAME,
+		       ORI_FILE_NAME,
+		       ACCOUNT,
+		       CITY_ID,
+		       BUSINESS_DATA_TYPE,
+		       FILE_SIZE,
+		       FILE_STATUS,
+		       JOB_ID,
+		       LAUNCH_TIME,
+		       COMPLETE_TIME
+		  from (select DATA_COLLECT_ID,
+		               TO_CHAR(UPLOAD_TIME, 'YYYY-MM-DD HH24:MI:SS') UPLOAD_TIME,
+		               TO_CHAR(BUSINESS_TIME, 'YYYY-MM-DD HH24:MI:SS') BUSINESS_TIME,
+		               FILE_NAME,
+		               ORI_FILE_NAME,
+		               ACCOUNT,
+		               CITY_ID,
+		               BUSINESS_DATA_TYPE,
+		               FILE_SIZE,
+		               FILE_STATUS,
+		               rec.JOB_ID JOB_ID,
+		               TO_CHAR(job.LAUNCH_TIME, 'YYYY-MM-DD HH24:MI:SS') LAUNCH_TIME,
+		               TO_CHAR(job.COMPLETE_TIME, 'YYYY-MM-DD HH24:MI:SS') COMPLETE_TIME,
+		               ROW_NUMBER() OVER(ORDER BY upload_time desc) AS rn
+		          from rno_ms_data_collect_rec rec
+		          left join rno_ms_job job
+		            on (rec.job_id = job.job_id)
+		         where ${fileStatus}
+		         CITY_ID = #{cityId}
+		           and BUSINESS_DATA_TYPE = #{fileCode}
+		           and UPLOAD_TIME >=
+		               to_date(#{begUploadDate}, 'yyyy-mm-dd HH24:mi:ss')
+		           and UPLOAD_TIME <=
+		               to_date(#{endUploadDate}, 'yyyy-mm-dd HH24:mi:ss')
+		         order by upload_time desc)
+		 where rn >= #{start}
+		   and rn <= #{end}
+		]]>
+	</select>
+	<select id="queryJobReportCnt" parameterType="long" resultType="int">
+		select count(report_id)
+		  from rno_ms_job_report
+		 where report_type = 1
+		   and job_id = #{jobId}
+	</select>
+	<select id="queryJobReportByPage" parameterType="java.util.Map"
+		resultType="map">
+		<![CDATA[
+		select REPORT_ID, JOB_ID, STAGE, BEG_TIME, END_TIME, STATE, ATT_MSG
+		  from (select REPORT_ID,
+		               JOB_ID,
+		               STAGE,
+		               BEG_TIME,
+		               END_TIME,
+		               STATE,
+		               ATT_MSG,
+		               rownum rn
+		          from (select REPORT_ID,
+		                       JOB_ID,
+		                       STAGE,
+		                       TO_CHAR(BEG_TIME, 'YYYY-MM-DD HH24:MI:SS') BEG_TIME,
+		                       TO_CHAR(END_TIME, 'YYYY-MM-DD HH24:MI:SS') END_TIME,
+		                       STATE,
+		                       ATT_MSG
+		                  from rno_ms_job_report
+		                 where report_type = 1
+		                   and job_id = #{jobId}
+		                 order by REPORT_ID))
+		 where rn >= #{start}
+		   and rn <= #{end}
+		]]>
+	</select>
+</mapper>

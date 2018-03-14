@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hgicreate.rno.lteazimuthevaluation.mapper.spark.SparkMapper">
+    <select id="queryLteMrDataCnt" parameterType="map" resultType="Long">
+        SELECT count(1)
+        FROM lte_mr_data
+        WHERE area_id = #{cityId}
+              AND record_time >= #{begTime}
+              AND record_time &lt;= #{endTime}
+    </select>
+
+    <select id="queryLteStructureDataCnt" parameterType="map" resultType="Long">
+        SELECT count(1)
+        FROM lte_structure_data
+        WHERE area_id = #{cityId}
+              AND record_date >= #{begTime}
+              AND record_date &lt;= #{endTime}
+    </select>
+
+    <select id="calcAzimuth" parameterType="map" resultType="com.hgicreate.rno.lteazimuthevaluation.model.AzimuthResult">
+        <!-- <![CDATA[ -->
+        SELECT
+        t11.cell_id,
+        IFNULL(t11.azimuth,-1) AS azimuth,
+        IFNULL(t11.azimuth1,-1) AS azimuth1,
+        IFNULL(t11.azimuth2,-1) AS azimuth2,
+        IFNULL(IF(
+        t11.diff1 > 180,
+        360 - t11.diff1,
+        t11.diff1
+        ),-1) AS diff1,
+        IFNULL(IF(
+        t11.diff2 > 180,
+        360 - t11.diff2,
+        t11.diff2
+        ),-1) AS diff2
+        FROM
+        (
+        SELECT
+        t8.cell_id,
+        t8.azimuth,
+        t9.azimuth1,
+        t10.azimuth2,
+        ABS( t9.azimuth1 - t8.azimuth ) AS diff1,
+        ABS( t10.azimuth2 - t8.azimuth ) AS diff2
+        FROM
+        (
+        SELECT
+        cell_id,
+        azimuth
+        FROM
+        lte_cell_param
+        WHERE
+        area_id = #{cityId}
+        ) t8
+        LEFT JOIN(
+        SELECT
+        t7.ncell_id,
+        IF(
+        t7.azimuth1 &lt; 0,
+        360 + t7.azimuth1,
+        t7.azimuth1
+        ) AS azimuth1
+        FROM
+        (
+        SELECT
+        t6.ncell_id,
+        round(
+        degrees(
+        atan(
+        t6.x / t6.y
+        )
+        )
+        ) AS azimuth1
+        FROM
+        (
+        SELECT
+        t5.ncell_id,
+        sum( t5.xdiff ) AS x,
+        sum( t5.ydiff ) AS y
+        FROM
+        (
+        SELECT
+        t4.ncell_id,
+        t4.lte_measurement_ratio1*t4.xdiff AS xdiff,
+        t4.lte_measurement_ratio1*t4.ydiff AS ydiff
+        FROM
+        (
+        SELECT
+        t1.ncell_id,
+        t1.lte_measurement_ratio1,
+        t1.lte_measurement_ratio2,
+        t1.lte_measurement_ratio12,
+        t1.lte_measurement_ratio22,
+        t2.lon - t3.lon AS xdiff,
+        t2.lat - t3.lat AS ydiff
+        FROM
+        (
+        SELECT
+        cell_id,
+        ncell_id,
+        rsrptimes0 / timestotal AS lte_measurement_ratio1,
+        rsrptimes2 / timestotal AS lte_measurement_ratio2,
+        rsrptimes0 / mixingsum AS lte_measurement_ratio12,
+        rsrptimes2 / mixingsum AS lte_measurement_ratio22
+        FROM
+        lte_mr_data
+        WHERE
+        area_id = #{cityId}
+        AND record_time >= #{begTime}
+        AND record_time &lt;= #{endTime}
+        ) t1
+        LEFT JOIN(
+        SELECT
+        cell_id,
+        longitude AS lon,
+        latitude AS lat
+        FROM
+        lte_cell_param
+        WHERE
+        area_id = #{cityId}
+        ) t2 ON
+        t1.cell_id = t2.cell_id
+        LEFT JOIN(
+        SELECT
+        cell_id,
+        longitude AS lon,
+        latitude AS lat
+        FROM
+        lte_cell_param
+        WHERE
+        area_id = #{cityId}
+        ) t3 ON
+        t1.ncell_id = t3.cell_id
+        ) t4
+        ) t5
+        GROUP BY
+        t5.ncell_id
+        ) t6
+        ) t7
+        ) t9 ON
+        t9.ncell_id = t8.cell_id
+        LEFT JOIN(
+        SELECT
+        cell_id,
+        sc_aoa AS azimuth2
+        FROM
+        lte_structure_data
+        WHERE
+        sc_aoa IS NOT NULL
+        AND area_id = #{cityId}
+        AND record_date >= #{begTime}
+        AND record_date &lt;= #{endTime}
+        ) t10 ON
+        t10.cell_id = t8.cell_id
+        ) t11
+        <!-- ]]> -->
+    </select>
+</mapper>
+ 

@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hgicreate.rno.ltestrucanlsservice.mapper.oracle.CommonMapper">
+    <insert id="addOneJob" parameterType="com.hgicreate.rno.ltestrucanlsservice.model.JobProfile">
+        <selectKey keyProperty="jobId" resultType="Long" order="BEFORE">
+            SELECT seq_rno_ms_job.NEXTVAL FROM DUAL
+        </selectKey>
+
+        INSERT INTO rno_ms_job (JOB_ID, JOB_NAME, CREATOR, PRIORITY, CREATE_TIME, JOB_TYPE, STATUS, JOB_RUNNING_STATUS)
+        VALUES (#{jobId}, #{jobName}, #{account}, #{priority}, sysdate, #{jobType}, 'N', #{jobStateStr})
+    </insert>
+
+    <update id="updateJobBegTime" parameterType="com.hgicreate.rno.ltestrucanlsservice.model.JobProfile">
+        UPDATE rno_ms_job
+        SET LAUNCH_TIME = #{launchTime}
+        WHERE job_id = #{jobId}
+    </update>
+
+    <update id="updateJobEndTime" parameterType="com.hgicreate.rno.ltestrucanlsservice.model.JobProfile">
+        UPDATE rno_ms_job
+        SET COMPLETE_TIME = #{finishTime}, JOB_RUNNING_STATUS = #{jobStateStr}
+        WHERE job_id = #{jobId}
+    </update>
+
+    <update id="updateJobRunningStatus" parameterType="com.hgicreate.rno.ltestrucanlsservice.model.JobProfile">
+        UPDATE rno_ms_job
+        SET JOB_RUNNING_STATUS = #{jobStateStr}
+        WHERE job_id = #{jobId}
+    </update>
+
+    <select id="getOneJob" parameterType="com.hgicreate.rno.ltestrucanlsservice.model.JobProfile" resultType="Long">
+        SELECT job_id
+        FROM (SELECT job_id
+        FROM rno_ms_job
+        WHERE job_running_status = #{jobStateStr}
+        AND job_type = #{jobType}
+        ORDER BY create_time DESC)
+        WHERE  rownum &lt; 2
+    </select>
+
+    <select id="getJobByJobId" parameterType="long" resultType="com.hgicreate.rno.ltestrucanlsservice.model.JobProfile">
+        SELECT
+            job_id,
+            job_name
+        FROM rno_ms_job
+        WHERE job_id = #{jobId}
+    </select>
+
+    <update id="stopJobByJobId" parameterType="long">
+        update Rno_Ms_Job
+        set Job_Running_Status = 'Stopped',
+                  COMPLETE_TIME = sysdate
+        where Job_Running_Status = 'Waiting'
+            or Job_Running_Status = 'Running'
+          and Job_Id = #{jobId}
+    </update>
+
+    <select id="checkJobStatus" parameterType="long" resultType="com.hgicreate.rno.ltestrucanlsservice.model.JobStatus">
+        SELECT JOB_RUNNING_STATUS FROM RNO_MS_JOB WHERE JOB_ID = #{jobId}
+    </select>
+</mapper>
+ 

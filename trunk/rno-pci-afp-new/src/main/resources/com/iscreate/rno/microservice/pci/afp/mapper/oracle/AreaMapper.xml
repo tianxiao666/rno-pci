@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+ 
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.iscreate.rno.microservice.pci.afp.mapper.oracle.OracleMapper">
+	<!-- 配置映射字段 --> 
+	<resultMap type="com.iscreate.rno.microservice.pci.afp.model.Area" id="table_sys_province">
+		<result property="areaId" column="AREA_ID" />
+		<result property="name" column="NAME" />
+		<result property="areaLevel" column="AREA_LEVEL"/>		
+		<result property="parentId" column="PARENT_ID"/>
+	</resultMap>
+	<select id="getSpecialLevalAreaByAccount" parameterType="String" resultMap="table_sys_province">
+		select sarea.AREA_ID, sarea.NAME, sarea.AREA_LEVEL, sarea.PARENT_ID
+		  from SYS_ACCOUNT       sa,
+		       SYS_USER_RELA_ORG suro,
+		       SYS_ORG_RELA_AREA sora,
+		       SYS_AREA          sarea
+		 where sa.org_user_id = suro.org_user_id
+		   and suro.org_id = sora.org_id
+		   and sarea.area_id = sora.area_id
+		   and suro.Status = 'A'
+		   and sa.account = #{account}
+	</select>
+	<select id="getSpecialUpperAreas" parameterType="java.util.Map" resultMap="table_sys_province">
+		select area_id, name, area_level, parent_id
+		  from (select distinct area_id, name, area_level, parent_id
+		          from sys_area a
+		         start with a.area_id in
+	         		<foreach collection="area_ids" item="item" index="index" open="(" close=")" separator=",">
+	                   #{item}
+	                </foreach>
+		        connect by a.area_id = prior a.parent_id) tmp
+		 where tmp.area_level = #{areaLevel} 
+	</select>
+	<select id="getUserConfigAreaId" parameterType="String" resultType="Long">
+		select atten_city_id from rno_user_config where account = #{account}
+	</select>
+	<select id="getParentIdByCityId" parameterType="long" resultType="Long">
+		select parent_id from sys_area where area_id = #{cfgCityId}
+	</select>
+</mapper>

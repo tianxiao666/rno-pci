@@ -1,0 +1,221 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hgicreate.rno.mapper.DataMapper">
+    <select id="findAzimuthEvalResultsByJobId" resultType="map">
+        SELECT
+        res.job_id,
+        res.cell_id,
+        cell.cell_name,
+        area.name,
+        res.azimuth,
+        res.azimuth1,
+        res.diff,
+        0 as result
+        FROM
+        rno_lte_azimuth_eval_res res,
+        rno_sys_area area,
+        rno_lte_cell cell
+        WHERE
+        res.city_id=area.id
+        AND res.cell_id=cell.cell_id
+        AND cell.cell_name IS NOT NULL
+        AND res.job_id=#{jobId}
+    </select>
+
+    <select id="findTop1000AzimuthEvalResultsByJobId" resultType="map">
+        SELECT
+        res.job_id,
+        res.cell_id,
+        cell.cell_name,
+        area.name,
+        res.azimuth,
+        res.azimuth1,
+        res.diff,
+        0 as result
+        FROM
+        rno_lte_azimuth_eval_res res,
+        rno_sys_area area,
+        rno_lte_cell cell
+        WHERE
+        res.city_id=area.id
+        AND res.cell_id=cell.cell_id
+        AND cell.cell_name IS NOT NULL
+        AND res.job_id=#{jobId}
+        LIMIT 1000
+    </select>
+
+    <select id="getNewestYearAndMonth" resultType="map">
+        select extract(year from (select max(record_date) from rno_lte_mr_data))as year,
+         extract(month from (select max(record_date) from rno_lte_mr_data))as month,
+         extract(day from (select max(record_date) from rno_lte_mr_data))as day
+    </select>
+
+    <select id="calcAzimuth" parameterType="map" resultType="com.hgicreate.rno.model.AzimuthEvalResult">
+        <!-- <![CDATA[ -->
+        select
+        t12.job_id,
+        t12.cell_id,
+        #{cityId} as city_id,
+        t12.azimuth,
+        (
+        CASE WHEN t12.diff1 > t12.diff2 THEN t12.azimuth2
+                         else t12.azimuth1
+                         end
+        ) as azimuth1,
+        (
+        CASE WHEN t12.diff1 > t12.diff2 THEN t12.diff2
+                         else t12.diff1
+                         end
+        ) as diff
+        from
+        (
+        SELECT
+        #{jobId} AS job_id,
+        t11.cell_id,
+        NULLIF(t11.azimuth,-1) AS azimuth,
+        NULLIF(t11.azimuth1,-1) AS azimuth1,
+        NULLIF(t11.azimuth2,-1) AS azimuth2,
+        NULLIF((
+        CASE WHEN t11.diff1 > 180
+        THEN 360 - t11.diff1
+        ELSE t11.diff1
+        END
+        ),-1) AS diff1,
+        NULLIF((
+        CASE WHEN t11.diff2 > 180
+        THEN 360 - t11.diff2
+        ELSE t11.diff2
+        END
+        ),-1) AS diff2
+        FROM
+        (
+        SELECT
+        t8.cell_id,
+        t8.azimuth,
+        t9.azimuth1,
+        t10.azimuth2,
+        ABS( t9.azimuth1 - t8.azimuth ) AS diff1,
+        ABS( t10.azimuth2 - t8.azimuth ) AS diff2
+        FROM
+        (
+        SELECT
+        cell_id,
+        azimuth
+        FROM
+        rno_lte_cell
+        WHERE
+        area_id=#{cityId}
+        <if test="evalType == 'input'">
+            and cell_id in
+            <foreach collection="cells" item="item" separator="," close=")" open="(">
+                #{item}
+            </foreach>
+        </if>
+        ) t8
+        LEFT JOIN(
+        SELECT
+        t7.ncell_id,
+        (
+        CASE WHEN t7.azimuth1 &lt; 0
+        THEN 360 + t7.azimuth1
+        ELSE t7.azimuth1
+        END
+        ) AS azimuth1
+        FROM
+        (
+        SELECT
+        t6.ncell_id,
+        round(
+        degrees(
+        atan(
+        t6.x / t6.y
+        )
+        )
+        ) AS azimuth1
+        FROM
+        (
+        SELECT
+        t5.ncell_id,
+        sum( t5.xdiff ) AS x,
+        sum( t5.ydiff ) AS y
+        FROM
+        (
+        SELECT
+        t4.ncell_id,
+        t4.lte_measurement_ratio1*t4.xdiff AS xdiff,
+        t4.lte_measurement_ratio1*t4.ydiff AS ydiff
+        FROM
+        (
+        SELECT
+        t1.ncell_id,
+        t1.lte_measurement_ratio1,
+        t1.lte_measurement_ratio2,
+        t1.lte_measurement_ratio12,
+        t1.lte_measurement_ratio22,
+        t2.lon - t3.lon AS xdiff,
+        t2.lat - t3.lat AS ydiff
+        FROM
+        (
+        SELECT
+        cell_id,
+        ncell_id,
+        cast(rsrp_times0 as numeric)/ cast (total_times as numeric) as lte_measurement_ratio1,
+        cast(rsrp_times2 as numeric) / cast(total_times as numeric) as lte_measurement_ratio2,
+        cast(rsrp_times0 as numeric)/ cast(mixing_sum as numeric) as lte_measurement_ratio12,
+        cast(rsrp_times2 as numeric) /cast(mixing_sum as numeric) as lte_measurement_ratio22
+        FROM
+        rno_lte_mr_data
+        WHERE
+        area_id=#{cityId}
+
+        ) t1
+        LEFT JOIN(
+        SELECT
+        cell_id,
+        longitude AS lon,
+        latitude AS lat
+        FROM
+        rno_lte_cell
+        WHERE
+        area_id=#{cityId}
+        ) t2 ON
+        t1.cell_id  = t2.cell_id 
+        LEFT JOIN(
+        SELECT
+        cell_id,
+        longitude AS lon,
+        latitude AS lat
+        FROM
+        rno_lte_cell
+        WHERE
+        area_id=#{cityId}
+        ) t3 ON
+        t1.ncell_id=t3.cell_id
+        ) t4
+        ) t5
+        GROUP BY
+        t5.ncell_id
+        ) t6
+        ) t7
+        ) t9 ON
+        t9.ncell_id=t8.cell_id
+        LEFT JOIN(
+        SELECT
+        cell_id,
+        sc_aoa AS azimuth2
+        FROM
+        rno_lte_structure_data
+        WHERE
+        sc_aoa IS NOT NULL
+        AND area_id=#{cityId}
+
+        ) t10 ON
+        t10.cell_id  = t8.cell_id 
+        ) t11)t12
+        <!-- ]]> -->
+    </select>
+</mapper>
+ 

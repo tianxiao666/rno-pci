@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hgicreate.rno.lteazimuthevaluation.mapper.oracle.OracleMapper">
+    <select id="queryJobReportCnt" parameterType="long" resultType="long">
+        SELECT count(1)
+        FROM rno_ms_job_report
+        WHERE report_type = 1
+              AND job_id = #{jobId}
+    </select>
+
+    <select id="queryJobReportByPage" parameterType="map" resultType="com.hgicreate.rno.lteazimuthevaluation.model.Report">
+        <!-- <![CDATA[ -->
+        SELECT
+            REPORT_ID,
+            JOB_ID,
+            STAGE,
+            BEG_TIME,
+            END_TIME,
+            FINISH_STATE,
+            ATT_MSG
+        FROM (SELECT
+                  REPORT_ID,
+                  JOB_ID,
+                  STAGE,
+                  BEG_TIME,
+                  END_TIME,
+                  FINISH_STATE,
+                  ATT_MSG,
+                  rownum rn
+              FROM (SELECT
+                        REPORT_ID,
+                        JOB_ID,
+                        STAGE,
+                        TO_CHAR(BEG_TIME, 'YYYY-MM-DD HH24:MI:SS') AS BEG_TIME,
+                        TO_CHAR(END_TIME, 'YYYY-MM-DD HH24:MI:SS') AS END_TIME,
+                        STATE                                      AS FINISH_STATE,
+                        ATT_MSG
+                    FROM rno_ms_job_report
+                    WHERE report_type = 1
+                          AND job_id = #{jobId}
+                    ORDER BY REPORT_ID))
+        WHERE rn >= #{start}
+              AND rn &lt;= #{end}
+        <!-- ]]> -->
+	</select>
+
+    <sql id="lteAzimuthEvaluationJobWhereCond">
+        <trim prefix="where" prefixOverrides="and|or">
+            <if test="null != taskName and taskName!=''">
+                and job.job_name like CONCAT(CONCAT('%',#{taskName}),'%')
+            </if>
+            <if test="null != taskStatus and taskStatus!='ALL'">
+                <if test="taskStatus=='LaunchedOrRunning'">
+                    and (job.job_running_status = 'Launched'
+                    or job.job_running_status ='Running')
+                </if>
+                <if test="taskStatus!= 'LaunchedOrRunning'">
+                    and job.job_running_status =#{taskStatus}
+                </if>
+            </if>
+            <if test="null != startSubmitTime and startSubmitTime!=''">
+                and job.create_time &gt;= to_date(#{startSubmitTime},'yyyy-MM-dd HH24:mi:ss')
+            </if>
+            <if test="null != endSubmitTime and endSubmitTime!=''">
+                and job.create_time &lt;= to_date(#{endSubmitTime},'yyyy-MM-dd HH24:mi:ss')
+            </if>
+            <if test="isMine=='on'">
+                and job.creator=#{account}
+            </if>
+            <if test="null != meaTime and meaTime!=''">
+                and sjob.beg_mea_time &lt;= to_date(#{meaTime},'yyyy-MM-dd')
+                and sjob.end_mea_time &gt;= to_date(#{meaTime},'yyyy-MM-dd')
+            </if>
+            <if test="cityId!=''">
+                and sjob.city_id =#{cityId}
+            </if>
+        </trim>
+    </sql>
+
+    <select id="getLteAzimuthEvaluationJobCount" parameterType="com.hgicreate.rno.lteazimuthevaluation.model.TaskQueryCond" resultType="long">
+        <!-- <![CDATA[ -->
+        select count(1) from RNO_MS_LTE_AZIMUTH_ASSES_JOB sjob left join rno_ms_job job on job.job_id = sjob.job_id
+        <include refid="lteAzimuthEvaluationJobWhereCond" />
+        order by sjob.create_time desc nulls last
+        <!-- ]]> -->
+    </select>
+
+    <select id="queryLteAzimuthEvaluationTaskByPage" parameterType="com.hgicreate.rno.lteazimuthevaluation.model.TaskQueryCond" resultType="com.hgicreate.rno.lteazimuthevaluation.model.TaskQueryResult">
+        <!-- <![CDATA[ -->
+        SELECT
+        t3.JOB_ID,
+        t3.JOB_NAME,
+        t3.JOB_RUNNING_STATUS,
+        t3.LAUNCH_TIME,
+        t3.COMPLETE_TIME,
+        t3.DL_FILE_NAME,
+        t3.BEG_MEA_TIME,
+        t3.END_MEA_TIME,
+        t3.CITY_NAME
+        FROM (SELECT
+        t2.JOB_ID,
+        t2.JOB_NAME,
+        t2.JOB_RUNNING_STATUS,
+        t2.LAUNCH_TIME,
+        t2.COMPLETE_TIME,
+        t2.DL_FILE_NAME,
+        t2.BEG_MEA_TIME,
+        t2.END_MEA_TIME,
+        t2.CITY_NAME,
+        rownum AS rn
+        FROM (SELECT
+        job.JOB_ID                                          AS JOB_ID,
+        job.JOB_NAME                                        AS JOB_NAME,
+        job.JOB_RUNNING_STATUS                              AS JOB_RUNNING_STATUS,
+        to_char(job.LAUNCH_TIME, 'yyyy-MM-dd HH24:mi:ss')   AS LAUNCH_TIME,
+        to_char(job.COMPLETE_TIME, 'yyyy-MM-dd HH24:mi:ss') AS COMPLETE_TIME,
+        SA.NAME                                             AS CITY_NAME,
+        sjob.DL_FILE_NAME                                   AS DL_FILE_NAME,
+        to_char(sjob.BEG_MEA_TIME, 'yyyy-MM-dd')            AS BEG_MEA_TIME,
+        to_char(sjob.END_MEA_TIME, 'yyyy-MM-dd')            AS END_MEA_TIME
+        FROM RNO_MS_LTE_AZIMUTH_ASSES_JOB sjob
+        LEFT JOIN rno_ms_job job ON job.JOB_ID = sjob.JOB_ID
+        LEFT JOIN SYS_AREA SA ON SA.AREA_ID = sjob.CITY_ID
+        <include refid="lteAzimuthEvaluationJobWhereCond" />
+        ORDER BY sjob.CREATE_TIME DESC NULLS LAST) t2) t3
+        WHERE t3.rn > ${startIndex}
+        AND t3.rn &lt;= ${endIndex}
+        <!-- ]]> -->
+    </select>
+</mapper>

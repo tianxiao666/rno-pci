@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+ 
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hgicreate.rno.mapper.LteDynaOverGraphMapper">
+
+	<select id="queryLteCellShapeDataByAreaStr" parameterType="string" resultType="map">
+	select rlc.business_cell_id cell_id, rlc.longitude, rlc.latitude, rlcms.shape_data from (select business_cell_id,
+	lte_cell_id, longitude, latitude from rno_lte_cell
+	where area_id in(${areaStr})) rlc
+	left join rno_lte_cell_map_shape rlcms
+	on (rlc.lte_cell_id = rlcms.lte_cell_id and rlcms.shape_type='T')
+	</select>
+</mapper>

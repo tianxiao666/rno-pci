@@ -1,0 +1,204 @@
+html, body {
+	width: 100%;
+	height: 100%;
+	margin: 0px;
+	background: #EEEEEE;
+	overflow-x: hidden;
+	overflow-y: hidden;
+}
+
+a:hover {
+	cursor: pointer;
+	text-decoration: none;
+}
+
+#map {
+	width: 100%;
+	height: 100%;
+	position: absolute;
+	z-index: 0;
+}
+
+.head_box {
+	padding: 6px 6px 0px;
+	padding-bottom: 0px;
+	padding-left: 36px;
+}
+
+.dialog2 {
+	background: url("../images/panel_title.png") repeat scroll 0 0
+		transparent;
+	border: 1px solid #99BBE8;
+	border-radius: 5px 5px 5px 5px;
+	font-size: 12px;
+	padding: 5px;
+	position: absolute;
+	z-index: 20; /*left:50%;*/
+}
+
+.citySelect select {
+	font-size: 12px;
+	height: 30px;
+}
+
+.select-width-control {
+	width: 100px;
+}
+
+.button-fontsize-control {
+	font-size: 12px;
+}
+
+.span-style-control span:hover {
+	cursor: pointer;
+}
+
+.box-height-control {
+	height: 100%
+}
+
+.popover-content {
+	max-height: 350px;
+	min-width: 300px;
+	padding-right: 40px;
+	overflow-x: auto;
+}
+
+.table-striped tbody tr:hover {
+	cursor: pointer;
+}
+
+.centerdiv {
+	text-align: center;
+}
+
+.cell-self-control {
+	width: 120px;
+	background: black;
+	font-size: 14px;
+}
+
+.cell-inter-control {
+	width: 120px;
+	background: green;
+	font-size: 14px;
+}
+
+.cell-0-control {
+	width: 120px;
+	background: #A0DFD4;
+	font-size: 14px;
+}
+
+.cell-1-control {
+	width: 120px;
+	background: #C5AFE2;
+	font-size: 14px;
+}
+
+.cell-2-control {
+	width: 120px;
+	background: #CBE493;
+	font-size: 14px;
+}
+
+/*左侧信息栏*/
+.resource_list_icon {
+	position: absolute;
+	right: 286px;
+	top: 0;
+	z-index: 2;
+	height: 100%;
+}
+
+.resource_list_icon .shad_v {
+	background: url("../images/shadv.png") repeat-y 0px 0px transparent;
+	height: 100%;
+	right: 0px;
+	position: absolute;
+	top: 0px;
+	width: 4px;
+}
+
+.resource_list_icon .switch {
+	background: url("../images/flexArrow.png") no-repeat transparent;
+	height: 68px;
+	right: 0px;
+	position: absolute;
+	top: 6px;
+	width: 18px;
+	z-index: 10;
+	background-color: white
+}
+
+.resource_list_icon .switch_hidden {
+	background: url("../images/flexArrow.png") no-repeat -22px 0px
+		transparent;
+	height: 68px;
+	left: -18px;
+	position: absolute;
+	top: 6px;
+	width: 18px;
+	z-index: 10;
+	display: none;
+	background-color: white
+}
+
+.resource_list_box {
+	background: url("../images/shadh.png") repeat-x scroll 0 0 #FFFFFF;
+	position: absolute;
+	right: 0;
+	top: 0;
+	width: 286px;
+	z-index: 2;
+	box-shadow: -2px -2px 5px #999;
+	overflow-x: auto;
+}
+
+.div_title_24px_blue {
+	height: 24px;
+	line-height: 24px;
+	text-align: center;
+	border: 1px solid #ddd;
+	margin-top: 5px;
+	background-color: #bdd3ef;
+	padding-left: 5px;
+	padding-right: 5px;
+}
+
+/*页面加载*/
+.loading_cover {
+	width: 100%;
+	height: 100%;
+	position: fixed;
+	top: 0px;
+	left: 0px;
+	z-index: 11;
+}
+
+.cover {
+	height: 100%;
+	width: 100%;
+	background: #fff;
+	opacity: 0.6;
+	filter: alpha(opacity = 60);
+}
+
+.loading {
+	height: 36px;
+	line-height: 36px;
+	background: url(../images/loading_img.gif) no-repeat;
+	padding-left: 50px;
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	margin-left: -100px;
+	font-weight: normal;
+	font-size: 14px;
+}
+
+.loading_fb {
+	padding: 0px 2px;
+	font-weight: bold;
+	color: #00F;
+}

@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+ 
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.iscreate.rnointerfermatrix.mapper.oracle.OracleMapper">
+	<select id="getLteInterferMartixCount" parameterType="map" resultType="long">
+	    select count(MARTIX_DESC_ID) from RNO_MS_4G_INTER_MARTIX_REC sjob
+	    <trim prefix="where" prefixOverrides="and|or">
+			<if test="cityId!=null">
+				and sjob.city_id =#{cityId}
+			</if>
+			<if test="interMartixType!='ALL'">
+				and sjob.TYPE =#{interMartixType}
+			</if>
+			<if test="begTime!=null">
+				and sjob.CREATE_DATE&gt;=to_date(#{begTime},'yyyy-mm-dd HH24:mi:ss')
+			</if>
+			<if test="endTime!=null">
+				and sjob.CREATE_DATE&lt;=to_date(#{endTime},'yyyy-mm-dd HH24:mi:ss')
+			</if>
+			and sjob.STATUS = 'Y'
+		</trim>
+	</select>
+	<select id="queryLteInterferMartixByPage" parameterType="map" resultType="map">
+		select t2.city_name,t2.job_id,t2.mr_job_id,t2.task_name,t2.type,
+		t2.Record_Num,t2.data_description,t2.SAMEFREQCELLCOEFWEIGHT,t2.SWITCHRATIOWEIGHT,
+		t2.RELA_NUM_TYPE,t2.job_running_status,t2.job_type,t2.start_mea_date,
+		t2.end_mea_date,t2.create_date,t2.launch_time,t2.complete_time
+		from (select t1.*, rownum as rn from (select sjob.job_id as job_id,
+		sjob.mr_job_id as mr_job_id,sjob.Record_Num as RECORD_NUM,sjob.TYPE as
+		TYPE,
+		sjob.TASK_NAME as TASK_NAME,sjob.Data_Description as DATA_DESCRIPTION,
+		sjob.SAMEFREQCELLCOEFWEIGHT as SAMEFREQCELLCOEFWEIGHT,
+		sjob.Switchratioweight as SWITCHRATIOWEIGHT,sjob.RELA_NUM_TYPE as
+		RELA_NUM_TYPE,
+		job.job_running_status as job_running_status,job.Job_Type as Job_Type,
+		sa.Name as city_name,to_char(sjob.start_mea_date, 'yyyy-MM-dd') as
+		start_mea_date,
+		to_char(sjob.end_mea_date, 'yyyy-MM-dd') as end_mea_date,
+		to_char(sjob.create_date, 'yyyy-MM-dd') as create_date,
+		to_char(job.launch_time, 'yyyy-MM-dd') as launch_time,
+		to_char(job.complete_time, 'yyyy-MM-dd') as complete_time
+		from RNO_MS_4G_INTER_MARTIX_REC sjob
+		left join rno_ms_job job on job.job_id = sjob.job_id
+		left join Sys_Area sa on sa.area_id = sjob.city_id
+		<trim prefix="where" prefixOverrides="and|or">
+			<if test="cityId!=null">
+				and sjob.city_id =#{cityId}
+			</if>
+			<if test="interMartixType!='ALL'">
+				and sjob.TYPE =#{interMartixType}
+			</if>
+			<if test="begTime!=null">
+				and sjob.CREATE_DATE&gt;=to_date(#{begTime},'yyyy-mm-dd HH24:mi:ss')
+			</if>
+			<if test="endTime!=null">
+				and sjob.CREATE_DATE&lt;=to_date(#{endTime},'yyyy-mm-dd HH24:mi:ss')
+			</if>
+			and sjob.STATUS = 'Y'
+		</trim>
+	    order by sjob.create_date desc) t1) t2 where t2.rn &lt;= (#{cnt} + #{startIndex}) 
+	    and t2.rn &gt; #{startIndex}
+	</select>
+	<select id="checkLteInterMartixThisWeek" parameterType="map" resultType="map">
+	    select  to_char(t.create_date, 'yyyy-MM-dd HH24:mi:ss') as CREATE_DATE
+		from RNO_MS_4G_INTER_MARTIX_REC  t where t.CITY_ID =#{cityId}
+		and t.CREATE_DATE &lt;= to_date(#{today},'yyyy-MM-dd HH24:mi:ss')
+		and t.CREATE_DATE &gt;= to_date(#{thisMonday},'yyyy-MM-dd HH24:mi:ss')
+		and t.WORK_STATUS = '计算完成' and t.STATUS = 'Y' order by t.create_date desc
+	</select>
+	<select id="getTaskNameListByCityId" parameterType="long" resultType="map">
+	    select Task_Name from RNO_MS_4G_INTER_MARTIX_REC where city_Id =#{cityId}
+	</select>
+	<insert id="createLteInterMartixRec" parameterType="map">
+	    <selectKey keyProperty="id" resultType="long" order="BEFORE">
+		     SELECT SEQ_4G_INTER_MARTIX_REC.NEXTVAL FROM DUAL
+	    </selectKey>
+	    insert into RNO_MS_4G_INTER_MARTIX_REC ( 
+				MARTIX_DESC_ID,
+				CITY_ID,
+				CREATE_DATE,
+				START_MEA_DATE,
+				END_MEA_DATE,
+				RECORD_NUM,
+				TYPE,
+				WORK_STATUS,
+				FILE_PATH,
+				JOB_ID,
+				STATUS,
+				FILE_NAME,
+				TASK_NAME,
+			    DATA_DESCRIPTION,
+				SAMEFREQCELLCOEFWEIGHT,
+				SWITCHRATIOWEIGHT,
+				SF_FILES)
+		  values(
+		        #{id, jdbcType=NUMERIC},
+				#{cityId, jdbcType=NUMERIC}, 
+				to_date(#{createDate, jdbcType=DATE}, 'yyyy-mm-dd HH24:mi:ss'),
+			    to_date(#{startMeaDate, jdbcType=DATE}, 'yyyy-MM-dd'), 
+			    to_date(#{endMeaDate, jdbcType=DATE}, 'yyyy-MM-dd'),
+			    #{recordNum, jdbcType=NUMERIC},
+				#{type, jdbcType=VARCHAR},
+				'排队中',
+				#{filePath, jdbcType=VARCHAR},
+				#{jobId, jdbcType=NUMERIC},
+				'Y',
+				#{fileName, jdbcType=VARCHAR},
+				#{taskName, jdbcType=VARCHAR},
+				#{dataDesc, jdbcType=VARCHAR}, 
+				#{sameFreqCellCoefWeight, jdbcType=NUMERIC},
+				#{switchRatioWeight, jdbcType=NUMERIC}, 
+				#{sfFiles, jdbcType=VARCHAR}
+				)
+	</insert>
+	<select id="query4GInterferMatrixRecByJobId" parameterType="long" resultType="map">
+	     select MARTIX_DESC_ID, CITY_ID,to_char(START_MEA_DATE, 'yyyyMMdd')START_MEA_DATE, to_char(END_MEA_DATE, 'yyyyMMdd')END_MEA_DATE, FILE_PATH, 
+	            FILE_NAME, SAMEFREQCELLCOEFWEIGHT, SWITCHRATIOWEIGHT, RELA_NUM_TYPE, 
+	            SF_FILES,MR_JOB_ID 
+	     from RNO_MS_4G_INTER_MARTIX_REC
+	     where JOB_ID =#{jobId}
+	</select>
+	<update id="update4GInterMatrixWorkStatus" parameterType="map">
+	     update RNO_MS_4G_INTER_MARTIX_REC t set t.work_status=#{jobStatus}
+         where t.martix_desc_id=#{matrixRecId}
+	</update>
+	<select id="getSfFileName" parameterType="map" resultType="map">
+         select FILE_NAME,REC_ID 
+         from rno_ms_lte_sf_file_rec 
+         where file_name in ${inStr}
+		 and area_id=#{cityId} order by mod_time	
+	</select>
+	<select id="getParameterForCellsMap" parameterType="long" resultType="map">
+		select t2.cid, t2.lng, t2.lat, t2.pci, t2.earfcn, t3.eid
+		from (select distinct t.Business_Cell_Id cid,
+		t.Longitude lng,
+		t.Latitude lat,
+		t.Pci,
+		t.Earfcn,
+		t.enodeb_id
+		from rno_lte_cell t
+		where t.Latitude is not null
+		and t.Longitude is not null
+		and t.Pci is not null
+		and t.Earfcn is not null
+		and t.Status = 'N'
+		and t.Area_Id = #{cityId}) t2
+		inner join (select distinct t1.Business_Enodeb_Id eid, t1.enodeb_id
+		from rno_lte_enodeb t1
+		where t1.Status = 'N'
+		and t1.Area_Id = #{cityId}) t3
+		on t2.enodeb_id = t3.enodeb_id
+		order by t3.eid
+	</select>
+	<update id="addMapReduceJobId" parameterType="map">
+	   update ${table} 
+	   set MR_JOB_ID=#{mrJobId} 
+	   WHERE JOB_ID=#{jobId}
+	</update>
+	<select id="queryTaskInfo" parameterType="long" resultType="map">
+	   select FILE_PATH, FILE_NAME, CREATE_DATE 
+	   from rno_ms_4g_inter_martix_rec 
+	   where job_id=#{jobId} 
+	   order by create_date desc
+	</select>
+</mapper>

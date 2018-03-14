@@ -1,0 +1,378 @@
+<?xml version="1.0" encoding="UTF-8"?>
+ 
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.iscreate.rno.microservice.pci.afp.mapper.oracle.OracleMapper">
+	<!-- 配置映射字段 -->
+	<resultMap type="com.iscreate.rno.microservice.pci.afp.model.RnoThreshold" id="table_rnoThreshold">
+		<result property="id" column="ID" />
+		<result property="orderNum" column="ORDER_NUM" />
+		<result property="moduleType" column="MODULE_TYPE" />
+		<result property="code" column="CODE" />
+		<result property="descInfo" column="DESC_INFO" />
+		<result property="defaultVal" column="DEFAULT_VAL" />
+		<result property="scopeDesc" column="SCOPE_DESC" />
+		<result property="conditionGroup" column="CONDITION_GROUP" />
+	</resultMap>
+	<resultMap type="com.iscreate.rno.microservice.pci.afp.model.JobProfile" id="table_RnoJob">
+		<result property="jobId" column="JOB_ID" />
+		<result property="jobName" column="JOB_NAME" />
+	</resultMap>
+	<resultMap type="com.iscreate.rno.microservice.pci.afp.model.RnoDataCollectRec" id="table_DataCollectRec">
+		<result property="dataCollectId" column="DATA_COLLECT_ID" />
+		<result property="fileName" column="FILE_NAME" />
+		<result property="oriFileName" column="ORI_FILE_NAME" />
+		<result property="cityId" column="CITY_ID" />
+		<result property="businessDataType" column="BUSINESS_DATA_TYPE" />
+		<result property="fileSize" column="FILE_SIZE" />
+		<result property="fullPath" column="FULL_PATH" />
+		<result property="fileStatus" column="FILE_STATUS" />
+		<result property="jobId" column="JOB_ID" />
+	</resultMap>
+	<sql id="pciAnalysisTaskCond">
+		<trim prefix="where" prefixOverrides="and|or">
+			<if test="isMine == 'on'">
+				and job.creator=#{account}
+			</if>
+			<if test="cityId != 0">
+				and sjob.city_id =#{cityId}
+			</if>
+			<if test="taskName != null and taskName != ''">
+				and job.job_name like CONCAT(CONCAT('%',#{taskName}),'%')
+			</if>
+			<if test="taskStatus != null and taskStatus != 'ALL'">
+				<if test="taskStatus=='LaunchedOrRunning'">
+					and (job.job_running_status = 'Launched'
+					or job.job_running_status ='Running')
+				</if>
+				<if test="taskStatus!= 'LaunchedOrRunning'">
+					and job.job_running_status =#{taskStatus}
+				</if>
+			</if>
+			<if test="meaTime != null and meaTime != ''">
+				and sjob.beg_mea_time &lt;= to_date(#{meaTime},'yyyy-MM-dd')
+				and sjob.end_mea_time &gt;=
+				to_date(#{meaTime},'yyyy-MM-dd')
+			</if>
+			<if test="startSubmitTime != null and startSubmitTime != ''">
+				and job.create_time &gt;= to_date(#{startSubmitTime},'yyyy-MM-dd
+				HH24:mi:ss')
+			</if>
+			<if test="endSubmitTime != null and endSubmitTime != ''">
+				and job.create_time &lt;= to_date(#{endSubmitTime},'yyyy-MM-dd
+				HH24:mi:ss')
+			</if>
+		</trim>
+	</sql>
+	<select id="getThresholdsByModuleType" parameterType="String" resultMap="table_rnoThreshold">
+		select id,
+		order_num,
+		module_type,
+		code,
+		desc_info,
+		default_val,
+		scope_desc,
+		condition_group
+		from RNO_THRESHOLD
+		where
+		module_type=#{moduleType} 
+		order by order_num
+	</select>
+	<select id="getPciAnalysisTaskCount" parameterType="com.iscreate.rno.microservice.pci.afp.model.TaskCond" resultType="long">
+		<!-- <![CDATA[ -->
+		select count(*)
+		from rno_ms_lte_pci_job sjob
+		left join rno_ms_job job
+		on job.job_id = sjob.job_id
+		<include refid="pciAnalysisTaskCond" />
+		order by sjob.create_time desc nulls last
+		<!-- ]]> -->
+	</select>
+	<select id="queryPciPlanTaskByPage" parameterType="com.iscreate.rno.microservice.pci.afp.model.TaskCond" resultType="map">
+		<!-- <![CDATA[ -->
+		select job_id,
+		       job_name,
+		       city_name,
+		       job_running_status,
+		       beg_mea_time,
+		       end_mea_time,
+		       dl_file_name,
+		       rd_file_name,
+		       result_dir,
+		       mr_job_id,
+		       launch_time,
+		       complete_time
+        from (select job_id,
+	               job_name,
+	               city_name,
+	               job_running_status,
+	               beg_mea_time,
+	               end_mea_time,
+	               dl_file_name,
+	               rd_file_name,
+	               result_dir,
+	               mr_job_id,
+	               launch_time,
+	               complete_time,
+	               rownum as rn
+				from (select sjob.job_id as job_id,
+							job.job_name as job_name,
+							job.job_running_status as job_running_status,
+							to_char(sjob.beg_mea_time,'yyyy-MM-dd HH24:mi:ss') as beg_mea_time,
+							to_char(sjob.end_mea_time,'yyyy-MM-dd HH24:mi:ss') as end_mea_time,
+							sjob.dl_file_name as dl_file_name,
+							sjob.rd_file_name as rd_file_name,
+							sjob.result_dir as result_dir,
+							sjob.mr_job_id as mr_job_id,
+							to_char(job.launch_time,'yyyy-MM-dd HH24:mi:ss') as launch_time,
+							to_char(job.complete_time,'yyyy-MM-dd HH24:mi:ss') as complete_time,
+							sa.Name as city_name
+					from rno_ms_lte_pci_job sjob
+					left join rno_ms_job job 
+					on job.job_id = sjob.job_id
+					left join Sys_Area sa
+					on 	sa.Area_Id = sjob.City_Id
+					<include refid="pciAnalysisTaskCond" />
+					order by sjob.create_time desc nulls last))
+		where rn &gt; ${startIndex} 
+		and rn &lt;= (${cnt} + ${startIndex})
+		<!-- ]]> -->
+	</select>
+	<select id="getLatelyLteMatrixByCityId" parameterType="long" resultType="map">
+	<![CDATA[ 
+	select martix_desc_id,create_date,task_name,job_id from (
+	select martix_desc_id,
+	to_char( create_date,'yyyy-MM-dd HH24:mi:ss') as create_date,
+	task_name,
+	job_id
+	from RNO_MS_4G_INTER_MARTIX_REC
+	where city_id = #{cityId}
+	and work_status='计算完成'
+	order by create_date desc)
+	where rownum <= 10 
+		]]> 
+	</select>
+	<select id="getJobIdFromDataCollectById" parameterType="long" resultType="long">
+		select t.Job_Id from
+		Rno_MS_Data_Collect_Rec t where t.Data_Collect_Id = #{_parameter}
+	</select>
+	<update id="updateJobId" parameterType="map">
+		UPDATE RNO_MS_DATA_COLLECT_REC SET JOB_ID = #{jobId} WHERE
+		DATA_COLLECT_ID =#{dataCollectId}
+	</update>
+	<insert id="saveJobParam" parameterType="map">
+		insert into rno_ms_lte_pci_job_param
+		(JOB_ID,PARAM_TYPE,PARAM_CODE,PARAM_VAL)
+		values(#{jobId,jdbcType=INTEGER},#{paramType,jdbcType=VARCHAR},#{paramCode,jdbcType=VARCHAR},#{paramVal,jdbcType=VARCHAR})
+	</insert>
+	<insert id="savePciTaskInfo">
+		insert into rno_ms_lte_pci_job(JOB_ID,BEG_MEA_TIME,END_MEA_TIME,CITY_ID,DL_FILE_NAME,
+		RD_FILE_NAME,RESULT_DIR,FINISH_STATE,STATUS,CREATE_TIME,MOD_TIME,
+		OPTIMIZE_CELLS,PLAN_TYPE,CONVER_TYPE,RELA_NUM_TYPE,IS_CHECK_NCELL,
+		DATA_FILE_PATH,IS_EXPORT_ASSOTABLE,IS_EXPORT_MIDPLAN,IS_EXPORT_NCCHECKPLAN,
+		SF_FILE_NAMES,FREQ_ADJ_TYPE,D1FREQ,D2FREQ,Matrix_Data_Collect_Id,
+		Flow_Data_Collect_Id,KS_CORR_VAL,get_matrix_type)
+		values
+		(#{jobId,jdbcType=NUMERIC},
+		to_date(#{begMeaTime,jdbcType=DATE}, 'yyyy-MM-dd HH24:mi:ss'),
+		to_date(#{endMeaTime,jdbcType=DATE}, 'yyyy-MM-dd HH24:mi:ss'),
+		#{cityId,jdbcType=NUMERIC},
+		#{dlFileName,jdbcType=VARCHAR},
+		#{rdFileName,jdbcType=VARCHAR},
+		#{resultDir,jdbcType=VARCHAR},
+		#{finishState,jdbcType=VARCHAR},
+		'N',
+		to_date(#{createTime,jdbcType=DATE}, 'yyyy-MM-dd HH24:mi:ss'),
+		to_date(#{modTime,jdbcType=DATE}, 'yyyy-MM-dd HH24:mi:ss'),
+		#{optimizeCells,jdbcType=CLOB},
+		#{planType,jdbcType=VARCHAR},
+		#{converType,jdbcType=VARCHAR},
+		#{relaNumType,jdbcType=VARCHAR},
+		#{isCheckNCell,jdbcType=VARCHAR},
+		#{dataFilePath,jdbcType=VARCHAR},
+		#{isExportAssoTable,jdbcType=VARCHAR},
+		#{isExportMidPlan,jdbcType=VARCHAR},
+		#{isExportNcCheckPlan,jdbcType=VARCHAR},
+		#{sfFiles,jdbcType=VARCHAR},
+		#{freqAdjType,jdbcType=VARCHAR},
+		#{d1Freq,jdbcType=VARCHAR},
+		#{d2Freq,jdbcType=VARCHAR},
+		#{matrixDcId,jdbcType=NUMERIC},
+		#{flowDcId,jdbcType=NUMERIC},
+		#{ks,jdbcType=NUMERIC},
+		#{getMatrixType,jdbcType=NUMERIC})
+	</insert>
+	<select id="queryPciPlanJobRecByJobId" parameterType="long" resultType="map">
+		select JOB_ID,
+		       BEG_MEA_TIME,
+		       END_MEA_TIME,
+		       CITY_ID,
+		       DL_FILE_NAME,
+		       RD_FILE_NAME,
+		       RESULT_DIR,
+		       FINISH_STATE,
+		       STATUS,
+		       CREATE_TIME,
+		       MOD_TIME,
+		       OPTIMIZE_CELLS,
+		       CONVER_TYPE,
+		       RELA_NUM_TYPE,
+		       MR_JOB_ID,
+		       PLAN_TYPE,
+		       DATA_FILE_PATH,
+		       IS_CHECK_NCELL,
+		       IS_EXPORT_ASSOTABLE,
+		       IS_EXPORT_MIDPLAN,
+		       IS_EXPORT_NCCHECKPLAN,
+		       FREQ_ADJ_TYPE,
+		       D1FREQ,
+		       D2FREQ,
+		       FLOW_DATA_COLLECT_ID,
+		       KS_CORR_VAL,
+		       MATRIX_DATA_COLLECT_ID,
+		       SF_FILE_NAMES,
+		       GET_MATRIX_TYPE
+  		from rno_ms_lte_pci_job
+  		where JOB_ID =#{jobId}
+  		order by CREATE_TIME desc
+	</select>
+	<select id="getParameterForCellsMap" parameterType="long" resultType="map">
+		select t2.cid, t2.lng, t2.lat, t2.pci, t2.earfcn, t3.eid
+		from (select distinct t.Business_Cell_Id cid,
+		t.Longitude lng,
+		t.Latitude lat,
+		t.Pci,
+		t.Earfcn,
+		t.enodeb_id
+		from rno_lte_cell t
+		where t.Latitude is not null
+		and t.Longitude is not null
+		and t.Pci is not null
+		and t.Earfcn is not null
+		and t.Status = 'N'
+		and t.Area_Id = #{cityId}) t2
+		inner join (select distinct t1.Business_Enodeb_Id eid, t1.enodeb_id
+		from rno_lte_enodeb t1
+		where t1.Status = 'N'
+		and t1.Area_Id = #{cityId}) t3
+		on t2.enodeb_id = t3.enodeb_id
+		order by t3.eid
+	</select>
+	<select id="getSfFileInfo" parameterType="map" resultType="map">
+		select file_name,rec_id
+		from rno_ms_lte_sf_file_rec
+		where file_name in ${inStr}
+		and area_id=#{cityId}
+		order by mod_time
+	</select>
+	<select id="queryParamInfo" parameterType="long" resultType="map">
+		select job_id, param_type, param_code, param_val
+		from rno_ms_lte_pci_job_param
+		where job_id =#{jobId}
+	</select>
+	<select id="queryDefaultParamInfo" parameterType="long" resultType="map">
+		select #{jobId} as job_id, 'STRUCTANA' as
+		param_type, CODE as param_code, DEFAULT_VAL as param_val
+		from RNO_THRESHOLD
+		where module_type = 'LTEINTERFERCALC'
+	</select>
+	<select id="getFlowFileInfoAsMap" parameterType="long" resultType="map">
+		select *
+		from RNO_MS_DATA_COLLECT_REC
+		where
+		Data_Collect_Id=#{flowDcId}
+	</select>
+	<select id="getFlowFileInfoAsBean" parameterType="long" resultMap="table_DataCollectRec">
+		select data_collect_id,
+		file_name,
+		ori_file_name,
+		city_id,
+		business_data_type,
+		file_size,
+		full_path,
+		file_status,
+		job_id
+		from RNO_MS_DATA_COLLECT_REC
+		where
+		Data_Collect_Id=#{flowDcId}
+	</select>
+	<select id="getmatrixInfo" parameterType="long" resultType="map">
+		select Full_Path from RNO_MS_DATA_COLLECT_REC where
+		Data_Collect_Id=#{matrixDcId}
+	</select>
+	<update id="updatePciPlanWorkStatus" parameterType="map">
+		update rno_ms_lte_pci_job t 
+		set t.finish_state = #{jobStatus} 
+		where t.job_id in (select job_id from rno_ms_job where job_id=#{jobId} and job_running_status !='Stopped')
+	</update>
+	<select id="addMapReduceJobId" parameterType="map">
+		update ${table}
+		set MR_JOB_ID=#{mrJobId}
+		WHERE JOB_ID=#{jobId}
+	</select>
+	<select id="queryFlowInfo" resultType="map">
+		select cell_id,cell_dflow,cell_uflow from RNO_MS_CELL_FLOW
+	</select>
+	<select id="queryDtInfo" resultType="map">
+		select cell_id,is_dt_cell from RNO_MS_CELL_FLOW
+	</select>
+	<update id="deleteFlowTab">
+		truncate table RNO_MS_CELL_FLOW
+	</update>
+	<insert id="insertToFlowTab" parameterType="java.util.List">
+		<selectKey keyProperty="id" resultType="long" order="BEFORE">
+			SELECT seq_rno_ms_cell_flow.NEXTVAL FROM DUAL
+		</selectKey>
+		insert into rno_ms_cell_flow
+		(DATAID, CELL_ID, CELL_DFLOW, CELL_UFLOW, IS_DT_CELL)
+		select
+		seq_rno_ms_cell_flow.NEXTVAL,A.* from(
+		<foreach close=")" collection="list" item="item" index="index" open="(" separator="union">
+			select
+			#{item.CELL_ID,jdbcType=VARCHAR},
+			#{item.CELL_DFLOW,jdbcType=DOUBLE},
+			#{item.CELL_UFLOW,jdbcType=DOUBLE},
+			#{item.IS_DT_CELL,jdbcType=VARCHAR}
+			from dual
+		</foreach>
+		)A
+	</insert>
+	<select id="getJobNameByJobId" parameterType="long" resultMap="table_RnoJob">
+		select job_id,job_name
+		from rno_ms_job where job_id
+		= #{jobId}
+	</select>
+	<select id="query4GInterferMatrixRecByJobId" parameterType="long" resultType="map">
+		select
+		MARTIX_DESC_ID,CITY_ID,START_MEA_DATE,END_MEA_DATE,FILE_PATH,FILE_NAME,
+		SAMEFREQCELLCOEFWEIGHT,SWITCHRATIOWEIGHT,RELA_NUM_TYPE,SF_FILES,MR_JOB_ID
+		from RNO_MS_4G_INTER_MARTIX_REC where JOB_ID
+		=#{jobId}
+	</select>
+	<update id="update4GInterMatrixWorkStatus" parameterType="map">
+		update RNO_MS_4G_INTER_MARTIX_REC t set
+		t.work_status=#{workStatus}
+		where t.martix_desc_id=#{martixRecId}
+	</update>
+	<update id="updateJobNameById" parameterType="map">
+		update rno_ms_job set job_name=#{jobName} where job_id=#{jobId}
+	</update>
+	<select id="getTaskInfoByJobId" parameterType="long" resultType="map">
+		select * from rno_ms_lte_pci_job where
+		job_id=#{jobId}
+	</select>
+	<select id="getLteCellInfoByCellId" parameterType="long" resultType="map">
+		select t1.business_cell_id cell,t1.cell_name
+		name,t1.pci,t1.earfcn,t2.business_enodeb_id ENODEB_ID
+		from rno_lte_cell t1
+		left join rno_lte_enodeb t2
+		on t1.enodeb_id =
+		t2.enodeb_id
+		where t1.area_id =#{cityId}
+	</select>
+	<update id="stopJob">
+	    update rno_ms_job set job_running_status='Stopped',
+	    complete_time=to_date(#{now,jdbcType=DATE}, 'yyyy-MM-dd HH24:mi:ss') where job_id=#{jobId}
+	</update>
+</mapper>

@@ -1,0 +1,49 @@
+{
+  "properties": [
+    {
+      "name": "rno.run-mode",
+      "type": "java.lang.String",
+      "description": "RNO 微服务的运行模式，值可以是 always, scheduler, never."
+    },
+    {
+      "name": "mybatis.spark.mapper-locations",
+      "type": "java.lang.String",
+      "description": "Description for mybatis.spark.mapper-locations."
+    },
+    {
+      "name": "mybatis.oracle.mapper-locations",
+      "type": "java.lang.String",
+      "description": "Description for mybatis.oracle.mapper-locations."
+    },
+    {
+      "name": "mybatis.oracle.type-aliases-package",
+      "type": "java.lang.String",
+      "description": "Description for mybatis.oracle.type-aliases-package."
+    },
+    {
+      "name": "mybatis.oracle.configuration.mapUnderscoreToCamelCase",
+      "type": "java.lang.String",
+      "description": "Description for mybatis.oracle.configuration.mapUnderscoreToCamelCase."
+    },
+    {
+      "name": "mybatis.spark.configuration.mapUnderscoreToCamelCase",
+      "type": "java.lang.String",
+      "description": "Description for mybatis.spark.configuration.mapUnderscoreToCamelCase."
+    },
+    {
+      "name": "mybatis.spark.type-aliases-package",
+      "type": "java.lang.String",
+      "description": "Description for mybatis.spark.type-aliases-package."
+    },
+    {
+      "name": "rno.scheduler.fixed-delay",
+      "type": "java.lang.String",
+      "description": "任务执行的延迟时间."
+    },
+    {
+      "name": "rno.batch",
+      "type": "java.lang.String",
+      "description": "批量提交的数量."
+    }
+  ]
+}

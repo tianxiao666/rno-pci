@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+ 
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hgicreate.rno.mapper.spark.SparkMapper">
+	<select id="getInCellInfo" parameterType="map" resultType="map">
+	select cell, ncell, rela_val from test_inter_matrix where job_id=#{jobId} and cell=#{cellId}
+	</select>
+	<select id="getOutCellInfo" parameterType="map" resultType="map">
+	select cell, ncell, rela_val from test_inter_matrix where job_id=#{jobId} and ncell=#{ncellId}
+	</select>
+	<select id="getPciCellInfo" parameterType="map" resultType="map">
+	select cell, ncell, rela_val, cell_pci, ncell_pci from test_inter_matrix where job_id=#{jobId} and cell=#{cellId} or ncell=#{cellId}
+	</select>
+</mapper>

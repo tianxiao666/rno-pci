@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>LTE天线方位角评估</title>
+
+    <link rel="stylesheet" href="../static/css/jquery-ui.css" th:href="@{css/jquery-ui.css}"/>
+    <link rel="stylesheet" href="../static/css/jquery-ui-1.10.3.custom.min.css"
+          th:href="@{css/jquery-ui-1.10.3.custom.min.css}"/>
+    <link rel="stylesheet" href="../static/css/jquery-ui-datepicker.css" th:href="@{css/jquery-ui-datepicker.css}"/>
+    <link rel="stylesheet" href="../static/css/jquery-ui-timepicker-addon.css"
+          th:href="@{css/jquery-ui-timepicker-addon.css}"/>
+    <link rel="stylesheet" href="../static/css/base.css" th:href="@{css/base.css}"/>
+    <link rel="stylesheet" href="../static/css/input.css" th:href="@{css/input.css}"/>
+    <link rel="stylesheet" href="../static/css/public.css" th:href="@{css/public.css}"/>
+    <link rel="stylesheet" href="../static/css/public-table.css" th:href="@{css/public-table.css}"/>
+    <link rel="stylesheet" href="../static/css/public-table-standard.css" th:href="@{css/public-table-standard.css}"/>
+    <link rel="stylesheet" href="../static/css/layer.css" th:href="@{css/layer.css}"/>
+    <link rel="stylesheet" href="../static/css/iscreate-paging.css" th:href="@{css/iscreate-paging.css}"/>
+    <link rel="stylesheet" href="../static/css/loading_cover.css" th:href="@{css/loading_cover.css}"/>
+
+    <script src="../static/js/jquery/1.9.1/jquery.min.js" th:src="@{js/jquery/1.9.1/jquery.min.js}"></script>
+    <script src="../static/js/jquery/plugins/jquery-ui.min.js" th:src="@{js/jquery/plugins/jquery-ui.min.js}"></script>
+    <script src="../static/js/jquery/plugins/jquery.form.js" th:src="@{js/jquery/plugins/jquery.form.js}"></script>
+    <script src="../static/js/jquery/plugins/jquery-ui-timepicker-addon.js"
+            th:src="@{js/jquery/plugins/jquery-ui-timepicker-addon.js}"></script>
+    <script src="../static/js/jquery/plugins/i18n/jquery-ui-datepicker-zh-CN.js"
+            th:src="@{js/jquery/plugins/i18n/jquery-ui-datepicker-zh-CN.js}"></script>
+    <script src="../static/js/jquery/plugins/i18n/jquery-ui-timepicker-zh-CN.js"
+            th:src="@{js/jquery/plugins/i18n/jquery-ui-timepicker-zh-CN.js}"></script>
+    <script src="../static/js/rno_lte_azimuth_eval_tool.js" th:src="@{js/rno_lte_azimuth_eval_tool.js}"></script>
+    <script src="../static/js/rno_lte_azimuth_evaluation.js" th:src="@{js/rno_lte_azimuth_evaluation.js}"></script>
+
+    <style>
+        .errorTips {
+            color: red;
+            width: 100px;
+            font-family: 华文中宋, serif;
+        }
+    </style>
+</head>
+<body>
+<!-- 数据加载遮罩层 -->
+<div class="loading_cover" id="loadingDataDiv" style="display: none">
+    <div class="cover"></div>
+    <h4 class="loading">
+        <em class="loading_fb" id="loadContentId"></em>,请稍侯...
+    </h4>
+</div>
+
+<span style="font-weight: bold;">当前位置： 动态覆盖 > LTE天线方位角评估</span>
+<br/>
+<div id="taskListDiv">
+    <!-- 结构分析任务查询条件 -->
+    <div style="width: 80%;margin-top: 20px; margin-left: 6%;">
+        <form id="taskListForm" method="post">
+            <input type="hidden" id="hiddenPageSize" name="pageSize" value="25"/>
+            <input type="hidden" id="hiddenCurrentPage" name="currentPage" value="1"/>
+            <input type="hidden" id="hiddenTotalPageCnt"/>
+            <input type="hidden" id="hiddenTotalCnt" name="totalCnt" value="-1"/>
+
+            <table class="main-table1 half-width" style="padding-top: 10px;">
+                <tr>
+                    <td class="menuTd" style="text-align: center">
+                        <span style="padding-top: 0">地市</span></td>
+                    <td class="menuTd" style="text-align: center">任务名称</td>
+                    <td class="menuTd" style="text-align: center">任务状态</td>
+                    <td class="menuTd" style="text-align: center">测量时间</td>
+                    <td class="menuTd" style="text-align: center">任务提交时间</td>
+                </tr>
+                <tr>
+                    <td style="text-align: left">
+                        省：<select name="provinceId" class="required" id="provinceId" title="省名">
+                        <!--/*@thymesVar id="provinces" type="java.util.List<com.hgicreate.rno.lteazimuthevaluation.model.Area>"*/-->
+                        <option th:each="province:${provinces}" th:value="${province.areaId}"
+                                th:text="${province.name}">广东省
+                        </option>
+                    </select>
+                        <br/>市：<select name="cityId" class="required" id="cityId" title="城市名">
+                        <!--/*@thymesVar id="cities" type="java.util.List<com.hgicreate.rno.lteazimuthevaluation.model.Area>"*/-->
+                        <option th:each="city:${cities}" th:value="${city.areaId}" th:text="${city.name}">广州市
+                        </option>
+                    </select>
+                    </td>
+                    <td>
+                        <input type="text" id="taskName" name="taskName" title="任务名称"/>
+                        <span id="nameErrorText" class="errorTips"></span>
+                    </td>
+                    <td style="text-align: left"><select name="taskStatus" title="任务状态">
+                        <option value="ALL">全部</option>
+                        <option value="LaunchedOrRunning">运行中</option>
+                        <option value="Succeeded">正常完成</option>
+                        <option value="Fail">异常终止</option>
+                        <option value="Waiting">排队中</option>
+                        <option value="Stopping">停止中</option>
+                        <option value="Stopped">已停止</option>
+                    </select></td>
+                    <td>
+                        <input id="meaTime" name="meaTime" class="short-input-text" type="text" readonly style="width: 132px;" title="测量时间"/>
+                    </td>
+
+                    <td style="text-align: left">
+                        <label for="startSubmitTime">从</label>
+                        <input id="startSubmitTime" name="startSubmitTime" class="short-input-text" type="text" readonly
+                               style="width: 132px;" title="开始时间"/>
+                        <br/>
+                        <label for="endSubmitTime">到</label>
+                        <input id="endSubmitTime" name="endSubmitTime" class="short-input-text" type="text" readonly
+                               style="width: 132px;" title="结束时间"/>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="5" style=" text-align: left;">
+                        <div style="margin: 11px"></div>
+                        <input id="queryTasks" type="button" style="width: 90px; margin-right:70px;" value="查 询"/>
+                        <input id="isMine" name="isMine" type="checkbox" title="只看我的任务"/>只看我的任务
+                    </td>
+                </tr>
+            </table>
+        </form>
+    </div>
+
+    <div style="width: 80%;margin-left: 6%;padding-top: 10px">
+        <form id="createTaskForm" action="createTask" method="post" style="display:none" title="跳转">
+            <input id="hiddenCityId" type="hidden" name="cityId" value=""/>
+        </form>
+        <table width="50%">
+            <tbody>
+            <tr>
+                <td style="width: 5%;white-space: nowrap;">
+                    <p><span style="font-weight: bold">方位角评估分析任务列表</span></p>
+                </td>
+                <td style="width: 15%">
+                    <input id="addOneTask" type="button" name="addOneTask"
+                           style="width: 85px;" value="新增任务" onclick=""/>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- 结构分析详情列表 -->
+    <div style="width: 80%;margin-left: 6%;padding-top: 10px">
+        <form id='downloadResultFileForm' action='downloadLteAzimuthFile' method='post' style="display:none"
+              title="下载文件">
+            <input type='hidden' id='jobId' name='jobId' value=''/>
+        </form>
+        <table id="taskListTab" class="greystyle-standard">
+            <thead>
+            <tr>
+                <th style="width: 8%">任务名称</th>
+                <th style="width: 8%">任务状态</th>
+                <th style="width: 8%">分析地区</th>
+                <th style="width: 8%">文件数量情况</th>
+                <th style="width: 8%">测试时间段</th>
+                <th style="width: 8%">启动时间</th>
+                <th style="width: 8%">完成时间</th>
+                <th style="width: 8%">操作</th>
+            </tr>
+            </thead>
+        </table>
+        <div class="paging_div" id="taskListPageBar">
+            <span class="mr10">共 <em id="emTotalCnt" class="blue">0</em> 条记录 </span>
+            <a class="paging_link page-first" title="首页"
+               onclick="showListViewByPage('first',submitTaskListForm,'taskListForm','taskListPageBar')"></a>
+            <a class="paging_link page-prev" title="上一页"
+               onclick="showListViewByPage('back',submitTaskListForm,'taskListForm','taskListPageBar')"></a>
+            第 <input type="text" id="showCurrentPage" class="paging_input_text"
+                     value="0"/> 页/<em id="emTotalPageCnt">0</em>页 <a
+                class="paging_link page-go" title="GO"
+                onclick="showListViewByPage('num',submitTaskListForm,'taskListForm','taskListPageBar')">GO</a>
+            <a class="paging_link page-next" title="下一页"
+               onclick="showListViewByPage('next',submitTaskListForm,'taskListForm','taskListPageBar')"></a>
+            <a class="paging_link page-last" title="末页"
+               onclick="showListViewByPage('last',submitTaskListForm,'taskListForm','taskListPageBar')"></a>
+        </div>
+    </div>
+</div>
+
+<!-- 查看job报告 -->
+<div id="reportListDiv" style="display:none">
+    <div style="width: 80%;margin-top: 20px; margin-left: 6%;">
+        <form id="reportListForm">
+            <input type="hidden" name="jobId" id="hiddenJobId" value=""/>
+            <input type="hidden" id="hiddenPageSize" name="pageSize" value="25"/>
+            <input type="hidden" id="hiddenCurrentPage" name="currentPage" value="1"/>
+            <input type="hidden" id="hiddenTotalPageCnt"/>
+            <input type="hidden" id="hiddenTotalCnt" name="totalCnt" value="-1"/>
+        </form>
+        <ul id="icons" class="ui-widget ui-helper-clearfix"
+            style="width:100px;cursor:pointer">
+            <li class="ui-state-default ui-corner-all" title="返回列表"
+                style="width:100px" onclick="returnToTaskList()"> &lt;&lt; 返回列表
+            </li>
+        </ul>
+        <table id="reportListTab" class="greystyle-standard">
+            <thead>
+            <tr>
+                <th>阶段</th>
+                <th>开始时间</th>
+                <th>结束</th>
+                <th>结果</th>
+                <th>详细信息</th>
+            </tr>
+            </thead>
+        </table>
+        <div class="paging_div" id="reportListPageBar">
+            <span class="mr10">共 <em id="emTotalCnt" class="blue">0</em> 条记录 </span>
+            <a class="paging_link page-first" title="首页"
+               onclick="showListViewByPage('first',queryReportData,'reportListForm','reportListPageBar')"></a>
+            <a class="paging_link page-prev" title="上一页"
+               onclick="showListViewByPage('back',queryReportData,'reportListForm','reportListPageBar')"></a>
+            第 <input type="text" id="showCurrentPage" class="paging_input_text" value="0"/> 页/<em
+                id="emTotalPageCnt">0</em>页
+            <a class="paging_link page-go" title="GO"
+               onclick="showListViewByPage('num',queryReportData,'reportListForm','reportListPageBar')">GO</a>
+            <a class="paging_link page-next" title="下一页"
+               onclick="showListViewByPage('next',queryReportData,'reportListForm','reportListPageBar')"></a>
+            <a class="paging_link page-last" title="末页"
+               onclick="showListViewByPage('last',queryReportData,'reportListForm','reportListPageBar')"></a>
+        </div>
+    </div>
+</div>
+</body>
+</html>

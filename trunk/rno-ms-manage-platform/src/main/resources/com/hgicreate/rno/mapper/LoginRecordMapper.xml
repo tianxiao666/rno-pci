@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hgicreate.rno.mapper.LoginRecordMapper">
+    <!-- 配置映射字段 -->
+    <select id="selectUserByAccount" parameterType="string" resultType="map">
+      select account_id,account,password,org_user_id from sys_account where account = #{account}
+    </select>
+    <select id="selectOrgUserByAccount" parameterType="string" resultType="map">
+        select org_user_id,name,email from sys_org_user where email = #{account}
+    </select>
+    <select id="selectOrgIdByName" resultType="long">
+        select org_id from sys_org where name = '网络优化技术部'
+    </select>
+    <insert id="insertLoginInfo" parameterType="map">
+        <selectKey keyProperty="id" resultType="long" order="BEFORE">
+            SELECT seq_SYS_SECURITY_LOGINRECORD.NEXTVAL FROM DUAL
+        </selectKey>
+         insert into SYS_SECURITY_LOGINRECORD (id,userid, logintime,explor,ip,lastlogintime) values
+             (#{id},#{account},to_date(#{login_time}, 'yyyy-MM-dd HH24:mi:ss'),#{browser},#{ip},to_date(#{last_login_time}, 'yyyy-MM-dd HH24:mi:ss'))
+    </insert>
+    <insert id="insertOrgUserInfo" parameterType="map">
+        <selectKey keyProperty="org_user_id" resultType="long" order="BEFORE">
+            SELECT seq_sys_org_user.NEXTVAL FROM DUAL
+        </selectKey>
+        insert into sys_org_user (org_user_id,name, email,status) values
+        (#{org_user_id},#{name},#{email},0)
+    </insert>
+    <insert id="insertAccountInfo" parameterType="map">
+        <selectKey keyProperty="account_id" resultType="long" order="BEFORE">
+            SELECT seq_sys_account.NEXTVAL FROM DUAL
+        </selectKey>
+        insert into sys_account (account_id,account, password,org_user_id,createtime,updatetime) values
+        (#{account_id},#{account},#{password},#{org_user_id},to_date(#{createtime}, 'yyyy-MM-dd HH24:mi:ss'),to_date(#{updatetime}, 'yyyy-MM-dd HH24:mi:ss'))
+    </insert>
+
+    <insert id="saveSysUserRelaPost" parameterType="map">
+        <selectKey keyProperty="USER_RELA_POST_ID" resultType="long" order="BEFORE">
+            SELECT seq_SYS_USER_RELA_POST.NEXTVAL FROM DUAL
+        </selectKey>
+        INSERT INTO SYS_USER_RELA_POST s (USER_RELA_POST_ID,CREATE_TIME,ORG_USER_ID,ORG_ID,STATUS,START_TIME,END_TIME) values
+        (#{USER_RELA_POST_ID},to_date(#{createtime}, 'yyyy-MM-dd HH24:mi:ss'),#{org_user_id}, #{org_id},#{status},to_date(#{start_time}, 'yyyy-MM-dd HH24:mi:ss'),to_date(#{end_time}, 'yyyy-MM-dd HH24:mi:ss'))
+    </insert>
+    <insert id="saveSysUserRelaOrg" parameterType="map">
+        INSERT INTO SYS_USER_RELA_ORG s (CREATETIME,ORG_USER_ID,ORG_ID,STATUS,UPDATETIME) values
+        (to_date(#{createtime}, 'yyyy-MM-dd HH24:mi:ss'),#{org_user_id}, #{org_id},#{status},to_date(#{update_time}, 'yyyy-MM-dd HH24:mi:ss'))
+    </insert>
+</mapper>

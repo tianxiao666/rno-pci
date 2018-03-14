@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+ 
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.iscreate.rno.microservice.pci.afp.mapper.oracle.OracleMapper">
+	<!-- 配置映射字段 -->
+	<insert id="addStatus" parameterType="com.iscreate.rno.microservice.pci.afp.model.RnoDataCollectRec">
+		<selectKey keyProperty="dataCollectId" resultType="long" order="BEFORE">
+			SELECT seq_rno_ms_data_collect_rec.NEXTVAL FROM DUAL
+		</selectKey>
+		insert into rno_ms_data_collect_rec
+		  (data_collect_id,
+		   upload_time,
+		   business_time,
+		   file_name,
+		   ori_file_name,
+		   city_id,
+		   business_data_type,
+		   file_size,
+		   full_path,
+		   file_status,
+		   job_id,
+		   account)
+		values
+		  (#{dataCollectId, jdbcType=NUMERIC},
+		   #{uploadTime, jdbcType=DATE},
+		   #{businessTime, jdbcType=DATE},
+		   #{fileName, jdbcType=VARCHAR},
+		   #{oriFileName, jdbcType=VARCHAR},
+		   #{cityId, jdbcType=NUMERIC},
+		   #{businessDataType, jdbcType=VARCHAR},
+		   #{fileSize, jdbcType=NUMERIC},
+		   #{fullPath, jdbcType=VARCHAR},
+		   #{fileStatus, jdbcType=VARCHAR},
+		   #{jobId, jdbcType=NUMERIC},
+		   #{account, jdbcType=VARCHAR})
+	</insert>
+    <update id="updateStatus" parameterType="com.iscreate.rno.microservice.pci.afp.model.RnoDataCollectRec">
+		update rno_ms_data_collect_rec
+		   set file_status = #{fileStatus}
+		 where data_collect_id = #{dataCollectId}
+   </update>
+   <update id="updateJobIdWithDataId" parameterType="map">
+		update rno_ms_data_collect_rec
+		   set job_id = #{jobId}
+		 where data_collect_id = #{dataId}
+   </update>
+</mapper>

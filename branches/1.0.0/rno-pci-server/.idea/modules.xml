@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/rno-lte-service/rno-lte-azimuth-evaluation-service/rno-lte-azimuth-evaluation-service.iml" filepath="$PROJECT_DIR$/rno-lte-service/rno-lte-azimuth-evaluation-service/rno-lte-azimuth-evaluation-service.iml" />
+      <module fileurl="file://$PROJECT_DIR$/rno-lte-service/rno-lte-common-service/rno-lte-common-service.iml" filepath="$PROJECT_DIR$/rno-lte-service/rno-lte-common-service/rno-lte-common-service.iml" />
+      <module fileurl="file://$PROJECT_DIR$/rno-lte-service/rno-lte-pci-afp-service/rno-lte-pci-afp-service.iml" filepath="$PROJECT_DIR$/rno-lte-service/rno-lte-pci-afp-service/rno-lte-pci-afp-service.iml" />
+      <module fileurl="file://$PROJECT_DIR$/rno-lte-service/rno-lte-service.iml" filepath="$PROJECT_DIR$/rno-lte-service/rno-lte-service.iml" />
+      <module fileurl="file://$PROJECT_DIR$/rno-pci-server.iml" filepath="$PROJECT_DIR$/rno-pci-server.iml" />
+      <module fileurl="file://$PROJECT_DIR$/rno-registry/rno-registry.iml" filepath="$PROJECT_DIR$/rno-registry/rno-registry.iml" />
+    </modules>
+  </component>
+</project>

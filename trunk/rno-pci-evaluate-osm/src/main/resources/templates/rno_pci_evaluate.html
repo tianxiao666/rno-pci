@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8" />
+<title>小区PCI评估</title>
+
+<!-- JQuery & JQuery UI -->
+<script src="../static/jquery/dist-3.1.1/jquery-3.1.1.js" th:src="@{/jquery/dist-3.1.1/jquery-3.1.1.js}"></script>
+<link rel="stylesheet" href="../static/jquery/jquery-ui-1.12.1/jquery-ui.css"
+	th:href="@{/jquery/jquery-ui-1.12.1/jquery-ui.css}">
+<script src="../static/jquery/jquery-ui-1.12.1/jquery-ui.js" th:src="@{/jquery/jquery-ui-1.12.1/jquery-ui.js}"></script>
+
+<!-- Bootstrap -->
+<link rel="stylesheet" href="../static/bootstrap/v3.3.7-dist/css/bootstrap.css"
+	th:href="@{/bootstrap/v3.3.7-dist/css/bootstrap.css}">
+<script src="../static/bootstrap/v3.3.7-dist/js/bootstrap.js" th:src="@{/bootstrap/v3.3.7-dist/js/bootstrap.js}"></script>
+
+<!-- Openlayers & Plugins-->
+<link rel="stylesheet" href="../static/openlayers/v3.19.1-dist/ol.css" th:href="@{/openlayers/v3.19.1-dist/ol.css}">
+<script src="../static/openlayers/v3.19.1-dist/ol-debug.js" th:src="@{/openlayers/v3.19.1-dist/ol-debug.js}"></script>
+<link rel="stylesheet" href="../static/openlayers/ol3-contextmenu/ol3-contextmenu.css"
+	th:href="@{/openlayers/ol3-contextmenu/ol3-contextmenu.css}">
+<script src="../static/openlayers/ol3-contextmenu/ol3-contextmenu-debug.js"
+	th:src="@{/openlayers/ol3-contextmenu/ol3-contextmenu-debug.js}"></script>
+<link rel="stylesheet" href="../static/openlayers/ol3-layerswitcher/ol3-layerswitcher.css"
+	th:href="@{/openlayers/ol3-layerswitcher/ol3-layerswitcher.css}">
+<script src="../static/openlayers/ol3-layerswitcher/ol3-layerswitcher.js"
+	th:src="@{/openlayers/ol3-layerswitcher/ol3-layerswitcher.js}"></script>
+
+<!-- 项目自定义 CSS 与 JS -->
+<link rel="stylesheet" href="../static/css/rno_pci_evaluate.css" th:href="@{/css/rno_pci_evaluate.css}">
+<script type="text/javascript" src="../static/js/rno_pci_evaluate.js" th:src="@{/js/rno_pci_evaluate.js}"></script>
+</head>
+<body>
+    <div class="loading_cover" id="loadingDataDiv" style="display: none">
+		<div class="cover"></div>
+		<h4 class="loading">
+			 <em class="loading_fb" id="loadContentId"></em>,请稍侯...
+		</h4>
+	</div>
+
+	<!-- 地图 -->
+	<div id="map"></div>
+
+	<div style="display: none">
+		<div id="popup"></div>
+	</div>
+
+	<div class="head_box">
+		<div class="dialog2 draggable ui-draggable">
+			<div style="padding: 5px">
+				<table class="citySelect">
+					<tr>
+						<!-- <td>省：</td> -->
+						<td>
+							<!-- 省： --> <select name="provinceId" class="form-control select-width-control" id="provinceId">
+								<option th:each="province:${provinces}" th:value="${province.get('AREA_ID')}" th:text="${province.get('NAME')}">广东省</option>
+						</select>
+						</td>
+						<td>
+							<!-- 市： --> <select name="cityId" class="form-control select-width-control" id="cityId">
+								<option th:each="city:${cities}" th:value="${city.get('AREA_ID')}" th:text="${city.get('NAME')}">广州市</option>
+						</select>
+						</td>
+						<td>
+							<!-- 区： --> <select name="areaId" class="form-control select-width-control" id="queryCellAreaId">
+								<option th:data-lon="${onearea.get('LONGITUDE')}" th:data-lat="${onearea.get('LATITUDE')}" th:each="onearea:${countryAreas}"
+									th:value="${onearea.get('AREA_ID')}" th:text="${onearea.get('NAME')}">天河区</option>
+						</select>
+						</td>
+						<td><select name="queryType" class="form-control select-width-control" id="queryType">
+								<option value="cellId">小区ID</option>
+								<option value="cellName">小区名</option>
+						</select></td>
+						<td><div class="input-group">
+								<input type="text" class="form-control" id="cellId" value="" placeholder="ID或名字用逗号隔开" /> <span id="queryCell"
+									class="input-group-addon span-style-control"><span class="glyphicon glyphicon-search"></span></span>
+							</div></td>
+						<td><span id="loadingCellTip"></span></td>
+					</tr>
+				</table>
+			</div>
+		</div>
+	</div>
+
+	<div class="panel panel-default">
+
+		<div class="resource_list_icon" style="right: 0">
+			<a href="#" class="switch"></a> <a href="#" class="switch_hidden"></a>
+			<div class="shad_v"></div>
+		</div>
+
+		<div class="resource_list_box box-height-control">
+			<div class="resource_list">
+				<div class="panel-body">
+
+					<ul class="nav nav-tabs" role="tablist" id="myTab">
+						<li role="presentation" class="active"><a href="#interPlanLi" role="tab" data-toggle="tab">PCI优化</a></li>
+						<li role="presentation"><a href="#interDataLi" role="tab" data-toggle="tab">干扰统计分析</a></li>
+					</ul>
+
+					<!-- Tab panes -->
+					<div class="tab-content">
+
+						<div role="tabpanel" class="tab-pane active" id="interPlanLi">
+							<!-- 标题 -->
+							<h3>频段类型</h3>
+							<hr />
+							<div class="form-inline">
+								<select id="bandType" class="form-control" style="width: 120px">
+									<option value="all">全部</option>
+									<option value="D">D频段</option>
+									<option value="E">E频段</option>
+									<option value="F">F频段</option>
+								</select> <input class="btn btn-primary" id="loadCellToMap" type="button" value="加载小区信息" name="loadCellToMap" />
+							</div>
+
+							<!-- 标题 -->
+							<h3>干扰矩阵</h3>
+							<hr />
+							<div class="form-inline">
+								<select class="form-control" name="pciMatrix" id="pciMatrix" style="width: 120px">
+
+								</select> <!-- <input class="btn btn-primary" id="loadPciMatrix" type="button" value="加载干扰矩阵" name="loadPciMatrix" /> --> 
+							</div><br/>
+							<div id="matrixTip"></div>
+
+							<!-- 标题 -->
+							<h3>图例参考</h3>
+							<hr />
+							<span class="col-sm-2 label cell-self-control">小区自身</span><br /> <span class="col-sm-2 label cell-inter-control">干扰小区</span><br />
+							<span class="col-sm-2 label cell-0-control">PCI模3为0小区</span><br /> <span class="col-sm-2 label cell-1-control">PCI模3为1小区</span><br />
+							<span class="col-sm-2 label cell-2-control">PCI模3为2小区</span>
+							
+						</div>
+
+						<div role="tabpanel" class="tab-pane" id="interDataLi"></div>
+
+					</div>
+
+				</div>
+			</div>
+		</div>
+
+	</div>
+
+	<button type="button" id="modalBtn" class="btn btn-primary btn-lg" data-toggle="modal" data-target="#myModal"
+		style="display: none">ModalBtn</button>
+
+	<!-- Modal(显示PCI智能优化) -->
+	<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true"
+		data-backdrop="static">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header" style="border-bottom: none; padding-bottom: 0px">
+					<button type="button" class="close" data-dismiss="modal">
+						<span aria-hidden="true">&times;</span><span class="sr-only">Close</span>
+					</button>
+					<h4 class="modal-title" id="myModalLabel">
+						〖<label id="cellname"></label>〗小区干扰分析
+					</h4>
+				</div>
+				<div class="modal-body">
+					<table id="pciAnalysisTable" class="table">
+						
+					</table>
+				</div>
+				<div class="modal-footer" style="border-top: none">
+					<button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+					<button type="button" class="btn btn-primary" data-dismiss="modal">确定</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- 显示小区名 -->
+	<div id="tooltip" style="color: red"></div>
+
+</body>
+</html>

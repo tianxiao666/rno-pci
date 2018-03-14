@@ -1,0 +1,224 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<title>新计算总览信息</title>
+<meta charset="UTF-8" />
+
+<link rel="stylesheet" href="css/jquery-ui.css" />
+<link rel="stylesheet" href="css/jquery-ui-1.10.3.custom.min.css" />
+<link rel="stylesheet" href="css/jquery-ui-datepicker.css" />
+<link rel="stylesheet" href="css/jquery-ui-timepicker-addon.css" />
+<link rel="stylesheet" href="css/base.css" />
+<link rel="stylesheet" href="css/input.css" />
+<link rel="stylesheet" href="css/public.css" />
+<link rel="stylesheet" href="css/public-table.css" />
+<link rel="stylesheet" href="css/public-table-standard.css" />
+<link rel="stylesheet" href="css/layer.css" />
+<link rel="stylesheet" href="css/iscreate-paging.css" />
+<link rel="stylesheet" href="css/loading_cover.css" />
+
+<script src="js/jquery/1.9.1/jquery.min.js"></script>
+<script src="js/jquery/plugins/jquery-ui.min.js"></script>
+<script src="js/jquery/plugins/jquery-ui-timepicker-addon.js"></script>
+<script src="js/jquery/plugins/i18n/jquery-ui-datepicker-zh-CN.js"></script>
+<script src="js/jquery/plugins/i18n/jquery-ui-timepicker-zh-CN.js"></script>
+<script src="js/jquery/plugins/vendor/jquery.ui.widget.js"></script>
+<script src="js/jquery/plugins/jquery.fileupload.js"></script>
+<script src="js/jquery/plugins/jquery.form.js"></script>
+<script src="js/rno_lte_interfer_calc_new.js"></script>
+<style type="text/css">
+.divcenter {
+	MARGIN-RIGHT: auto;
+	MARGIN-LEFT: auto;
+}
+
+.detailTable {
+	border-collapse: separate;
+	border-spacing: 10px;
+}
+
+.container-bottom1 {
+	text-align: center;
+	padding: 0px 0px 20px;
+}
+
+.container-bottom2 {
+	text-align: center;
+	padding: 0px 0px 20px;
+}
+
+.bar {
+	height: 20px;
+	background: green;
+}
+
+.progress {
+	height: 20px;
+	margin-bottom: 20px;
+	overflow: hidden;
+	background-color: #f5f5f5;
+	border-radius: 4px;
+	-webkit-box-shadow: inset 0 1px 2px rgba(0, 0, 0, .1);
+	box-shadow: inset 0 1px 2px rgba(0, 0, 0, .1);
+}
+
+.hiddenclass{
+  display: none;
+}
+</style>
+</head>
+
+<body>
+	<div style="margin: 10px;" th:each="taskInfo:${taskobj}">
+		<div class="loading_cover" id="loadingDataDiv" style="display: none">
+			<div class="cover"></div>
+			<h4 class="loading">
+				<em class="loading_fb" id="loadContentId"></em>,请稍侯...
+			</h4>
+		</div>
+
+		<input type="hidden" id="lteCellsFromSession" th:value="${taskInfo.lteCells}" /> <input type="hidden" name="calType"
+			class="" id="calType" th:value="${taskInfo.isUseFlow}" /> <input type="hidden" id="cityId" name="cityId"
+			th:value="${taskInfo.cityId}" />
+
+		<!-- <form id='initNcsAnalysisPageForm' action="initNewLteInterferCalcPageAction" method='post' style="display:none">
+		<input type="hidden" id="cityIdParam" name="cityId" th:value="${taskInfo.cityId}"/>
+	</form> -->
+		<font style="font-weight: bold;">当前位置： PCI优化 &gt;区域PCI翻频方案(新算法) &gt; 新建任务</font> <br />
+		<center>
+			<a href="/returnBack" style="text-decoration: underline; font-weight: bold;">&lt;&lt;返回任务列表</a><br /> <br />
+			<font style="font-weight: bold;">任务信息>>参数配置>><font style="color: #31FF81;">提交任务</font></font> <br />
+			<br />
+		</center>
+
+		<div style="margin-bottom: 15px;">
+			<div class="divcenter" style="width: 800px;">
+				<center>
+					<font style="font-size: large; font-weight: bold;">任务提交</font>
+					<h1 />
+				</center>
+				<input type="hidden" id="impmatrix"  th:value="${taskInfo.isImportMatrix}"/> 
+				<input type="hidden" id="usesf"  th:value="${taskInfo.isUseSf}"/> 
+				<input type="button" id="overviewInfoPreStep" name="" value="&lt;上一步 " onclick="fromOverviewInfoToParamInfoPage()" />
+				<div style="height: 2px; border-bottom: 1px #000 solid;"></div>
+				<table width="100%" border="0" cellspacing="0" cellpadding="0" class="detailTable">
+					<caption style="font-size: medium;">任务信息</caption>
+					<tr>
+						<td width="19%">任务名称</td>
+						<td width="81%" th:text="${taskInfo.taskName}"></td>
+					</tr>
+					<tr>
+						<td width="19%">分析地市</td>
+						<td width="81%" th:text="${taskInfo.provinceName}+${taskInfo.cityName}"></td>
+					</tr>
+					<tr>
+						<td>任务描述</td>
+						<td th:text="${taskInfo.taskDesc}"></td>
+					</tr>
+				</table>
+				
+				<table width="100%" th:class="!${taskInfo.isUseSf}?'hiddenclass'">
+					<tr>
+						<td colspan="2" align="center" style="font-size: medium;">选择扫频文件
+						</td>
+					</tr>
+					<tr>
+						<td style="padding-left: 2px">
+						<table id="structureParamTable"  class="greystyle-standard" style="width: 100%">
+							<thead>
+								<tr>
+									<th>选择</th>
+									<th>文件</th>
+									<th>测量时间</th>
+									<th>数据量</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr th:each="sf:${sfFileInfo}">
+									<td><input class="forfilecheck" type="checkbox" /></td>
+									<td class='filename' th:value="${sf.FILE_NAME}" th:text="${sf.FILE_NAME}"></td>
+									<td th:value="${sf.MEA_TIME}" th:text="${sf.MEA_TIME}"></td>
+									<td th:value="${sf.RECORD_COUNT}" th:text="${sf.RECORD_COUNT}"></td>
+								</tr>
+							</tbody>
+						</table>
+						</td>
+					</tr>
+				</table>
+                 <div style="margin:15px"></div>
+				<table width="100%" border="0" cellspacing="0" cellpadding="0" class="aa">
+					<tr>
+						<td colspan="2" align="center" style="font-size: medium;">变PCI小区表<span style="font-size: smaller"><font
+								color="red">(以逗号</font>,<font color="red">分隔)</font></span>
+						</td>
+					</tr>
+					<tr>
+						<td style="padding-left: 2px">
+							<table id="11" class="main-table1 half-width">
+								<tr>
+									<td><textarea name="fd" id="pciCell" style="width: 100%; height: 300px"></textarea></td>
+								</tr>
+
+							</table>
+
+						</td>
+					</tr>
+				</table>
+
+				<form id="formImportPciPlanFile" enctype="multipart/form-data" method="post">
+					<!--<input id="fileupload" type="file" name="files[]" hidden="hidden" /> 
+				    <input type="hidden" name="fileCode" id='fileCode' value="" /> 
+					<input type="hidden" name="token" id="token" value="" />  -->
+					<input type="hidden" name="cells" id="cells" value=""/>
+					<input type="hidden" id="citymenu" name="cityId" th:value="${taskInfo.cityId}" />
+				   <!--  <input type="hidden" name="meaTime" class="" id='meatime' th:value="${taskInfo.startTime}" /> -->
+					<div id="importTitleDiv1" th:class="${taskInfo.isImportMatrix}=='NO'?'hiddenclass'">
+						<table class="main-table1 half-width" style="margin-left: 0; width: 100%">
+							<tbody>
+								<tr>
+									<td style="text-align: left;">
+										导入干扰矩阵文件(csv) <input type="file" style="width: 44%;" name="file" id="fileid" class="canclear required" />
+										<span style="color: red; width: 100px; font-family: 华文中宋; text-align: center" id="fileDiv"></span></td>
+									<!-- <div id="progressInfoDiv" style="width: 100%; display: none">
+										<h2 id="progressNum">0%</h2>
+										<div id="progressbar"></div>
+									</div> -->
+								</tr>
+							</tbody>
+						</table>
+					</div>
+					
+					<!-- <div id="importDiv1" class="container-bottom1" style="display: none; padding-top: 10px">
+
+						<div id="uploadMsgDiv" style="display: none"></div>
+						<div id="importResultDiv" class="container-bottom1" style="padding-top: 10px; height: 0px;">
+							<div id="progressInfoDiv" style="width: 100%; display: none">
+								<h2 id="progressNum">0%</h2>
+								<div id="progressbar"></div>
+							</div>
+						</div>
+					</div> -->
+
+				</form>
+
+				<table width="100%" border="0" cellspacing="0" cellpadding="0" class="detailTable">
+					<tr>
+						<td style="padding-left: 80px"><input type="button" id="submitTask" value="提交任务" /></td>
+						<td style="padding-left: 2px"><input type="button" id="cancleTask" value="取消任务" /></td>
+					</tr>
+				</table>
+			</div>
+			<div id="operInfo"
+				style="display: none; top: 40px; left: 600px; z-index: 999; width: 400px; height: 40px; background-color: #7dff3f; filter: alpha(Opacity = 80); -moz-opacity: 0.5; opacity: 0.5; z-index: 9999; position: fixed;">
+				<table height="100%" width="100%" style="text-align: center">
+					<tr>
+						<td><span id="operTip"></span></td>
+					</tr>
+				</table>
+
+			</div>
+		</div>
+	</div>
+	<span id="sessionId" hidden="" th:text="${session.account}"></span>
+</body>
+</html>

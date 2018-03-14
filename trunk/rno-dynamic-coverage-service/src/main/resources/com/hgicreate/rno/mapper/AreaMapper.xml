@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+ 
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hgicreate.rno.mapper.LteDynaOverGraphMapper">
+	<!-- 配置映射字段 --> 
+	<resultMap type="Area" id="table_sys_province">
+		<result property="areaId" column="AREA_ID" />
+		<result property="name" column="NAME" />
+		<result property="areaLevel" column="AREA_LEVEL"/>		
+		<result property="parentId" column="PARENT_ID"/>
+		<result property="lon" column="LONGITUDE"/>
+		<result property="lat" column="LATITUDE"/>
+	</resultMap>
+	<select id="getSpecialLevalAreaByAccount" parameterType="String" resultMap="table_sys_province">
+		select sarea.AREA_ID, sarea.NAME, sarea.AREA_LEVEL, sarea.PARENT_ID
+		  from SYS_ACCOUNT       sa,
+		       SYS_USER_RELA_ORG suro,
+		       SYS_ORG_RELA_AREA sora,
+		       SYS_AREA          sarea
+		 where sa.org_user_id = suro.org_user_id
+		   and suro.org_id = sora.org_id
+		   and sarea.area_id = sora.area_id
+		   and suro.Status = 'A'
+		   and sa.account = #{account}
+	</select>
+	<select id="getSpecialUpperAreas" parameterType="java.util.Map" resultMap="table_sys_province">
+		select area_id, name, area_level, parent_id,longitude,latitude
+		  from (select distinct area_id, name, area_level,longitude,latitude,parent_id
+		          from sys_area a
+		         start with a.area_id in
+	         		<foreach collection="area_ids" item="item" index="index" open="(" close=")" separator=",">
+	                   #{item}
+	                </foreach>
+		        connect by a.area_id = prior a.parent_id) tmp
+		 where tmp.area_level = #{areaLevel} 
+	</select>
+	<select id="getUserConfigAreaId" parameterType="String" resultType="string">
+		select atten_city_id from rno_user_config where account = #{account}
+	</select>
+	<select id="getParentIdByCityId" parameterType="long" resultType="long">
+		select parent_id from sys_area where area_id = #{cfgCityId}
+	</select>
+	
+	<select id="getSubAreasInSpecAreaLevel" resultType="map">
+	select a.* from sys_area a start with a.area_id in 
+	<foreach collection="area_ids" item="item" index="index" open="(" close=")" separator=",">
+	                   #{item}
+	                </foreach>
+	 connect by prior a.area_id=a.parent_id and area_level=#{area_level}
+	</select>
+	
+	<select id="getAreaByAccount" parameterType="String" resultType="map">
+	select sarea.*
+	from SYS_ACCOUNT sa,
+	SYS_USER_RELA_ORG suro,
+	SYS_ORG_RELA_AREA sora,
+	SYS_AREA sarea 
+	where sa.org_user_id = suro.org_user_id
+	and suro.org_id = sora.org_id
+	and sarea.area_id = sora.area_id
+	and suro.Status = 'A' and sa.account = #{account}
+	</select>
+	<select id="getAllAreaList" resultType="map">
+	select  * from sys_area ORDER BY PARENT_ID
+	</select>
+	<select id="queryCellParmsByCityId" parameterType="long" resultType="map">
+		select CELL_ID,Longitude as LON,Latitude as LAT, STATION_SPACE,band_type,Longitude || ','||Latitude as SHAPE_DATA from rno_ms_lte_cell where area_id =#{cityId}
+	</select>
+	
+</mapper>

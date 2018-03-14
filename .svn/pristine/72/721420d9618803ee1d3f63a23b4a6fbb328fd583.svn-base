@@ -1,0 +1,245 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hgicreate.rno.ltestrucanlsservice.mapper.spark.SparkMapper">
+    <select id="queryLteMrDataCnt" parameterType="map" resultType="Long">
+        SELECT count(1)
+        FROM lte_mr_data
+        WHERE area_id = #{cityId}
+              AND record_time >= #{begTime}
+              AND record_time &lt;= #{endTime}
+    </select>
+
+    <select id="queryLteStructureDataCnt" parameterType="map" resultType="Long">
+        SELECT count(1)
+        FROM lte_structure_data
+        WHERE area_id = #{cityId}
+              AND record_date >= #{begTime}
+              AND record_date &lt;= #{endTime}
+    </select>
+
+    <select id="calcOverlapCover" parameterType="map" resultType="com.hgicreate.rno.ltestrucanlsservice.model.OverlapCover">
+        <!-- <![CDATA[ -->
+        SELECT t.cell_id,
+        t.total_cnt,
+        t.sc_gt105_gt0_cnt,
+        t.sc_gt110_gt0_cnt,
+        t.sc_gt105_gt0_cnt / t.total_cnt AS sc_gt105_gt0_per,
+        t.sc_gt110_gt0_cnt / t.total_cnt AS sc_gt110_gt0_per,
+        t.sc_gt110_nc_sc_gt6_gt3_cnt,
+        t.sc_gt110_nc_sc_gt6_gt4_cnt,
+        t.sc_gt110_nc_sc_gt6_gt5_cnt,
+        t.sc_gt110_nc_sc_gt6_gt6_cnt,
+        t.sc_gt110_nc_sc_gt6_gt3_cnt / t.total_cnt AS sc_gt110_nc_sc_gt6_gt3_per,
+        t.sc_gt110_nc_sc_gt6_gt4_cnt / t.total_cnt AS sc_gt110_nc_sc_gt6_gt4_per,
+        t.sc_gt110_nc_sc_gt6_gt5_cnt / t.total_cnt AS sc_gt110_nc_sc_gt6_gt5_per,
+        t.sc_gt110_nc_sc_gt6_gt6_cnt / t.total_cnt AS sc_gt110_nc_sc_gt6_gt6_per,
+        t.sc_gt110_nc_sc_gt10_gt3_cnt,
+        t.sc_gt110_nc_sc_gt10_gt4_cnt,
+        t.sc_gt110_nc_sc_gt10_gt5_cnt,
+        t.sc_gt110_nc_sc_gt10_gt6_cnt,
+        t.sc_gt110_nc_sc_gt10_gt3_cnt / t.total_cnt AS sc_gt110_nc_sc_gt10_gt3_per,
+        t.sc_gt110_nc_sc_gt10_gt4_cnt / t.total_cnt AS sc_gt110_nc_sc_gt10_gt4_per,
+        t.sc_gt110_nc_sc_gt10_gt5_cnt / t.total_cnt AS sc_gt110_nc_sc_gt10_gt5_per,
+        t.sc_gt110_nc_sc_gt10_gt6_cnt / t.total_cnt AS sc_gt110_nc_sc_gt10_gt6_per,
+        t.sc_gt110_eq1_cnt,
+        t.sc_gt110_eq2_cnt,
+        t.sc_gt110_eq3_cnt,
+        t.sc_gt110_eq4_cnt,
+        t.sc_gt110_eq5_cnt,
+        t.sc_gt110_eq6_cnt,
+        t.sc_gt110_eq7_cnt,
+        t.sc_gt110_eq8_cnt,
+        t.sc_gt110_eq9_cnt
+        FROM lte_structure_data t
+        WHERE t.area_id = #{cityId}
+        AND t.record_date >= #{begTime}
+        AND t.record_date &lt;= #{endTime}
+        <!-- ]]> -->
+    </select>
+
+    <select id="calcOverCover" parameterType="map" resultType="com.hgicreate.rno.ltestrucanlsservice.model.OverCover">
+        <!-- <![CDATA[ -->
+        SELECT t1.cell_id,
+        t2.cell_name,
+        t1.cell_pci,
+        t1.cell_earfcn,
+        t2.lon AS cell_lon,
+        t2.lat AS cell_lat,
+        t2.station_space,
+        t1.ncell_id,
+        t3.cell_name AS ncell_name,
+        t1.ncell_pci,
+        t1.ncell_earfcn,
+        t3.lon AS ncell_lon,
+        t3.lat AS ncell_lat,
+        t1.ncell_cnt,
+        t1.total_cnt,
+        t1.ncell_cnt / t1.total_cnt AS ncell_per,
+        t1.dis
+        FROM (SELECT cell_id,
+        cell_pci,
+        cell_earfcn,
+        ncell_id,
+        ncell_pci,
+        ncell_earfcn,
+        filteredrsrptimes1 as ncell_cnt,
+        filteredmixingsum  as total_cnt,
+        distance_km AS dis
+        FROM lte_mr_data
+        WHERE area_id = #{cityId}
+        AND record_time >= #{begTime}
+        AND record_time &lt;= #{endTime}) t1
+        INNER JOIN (SELECT cell_id,
+        cell_name,
+        longitude AS lon,
+        latitude AS lat,
+        station_space
+        FROM lte_cell_param
+        WHERE area_id = #{cityId}) t2
+        ON t1.cell_id = t2.cell_id
+        INNER JOIN (SELECT cell_id, cell_name, longitude AS lon, latitude AS lat
+        FROM lte_cell_param
+        WHERE area_id = #{cityId}) t3
+        ON t1.ncell_id = t3.cell_id
+        <!-- ]]> -->
+    </select>
+
+    <select id="calcMetricsSummary" parameterType="map" resultType="com.hgicreate.rno.ltestrucanlsservice.model.MetricsSummary">
+        <!-- <![CDATA[ -->
+        SELECT t3.cell_id,
+        t3.cell_name,
+        t4.weak_flag,
+        t4.overlap_flag,
+        t3.np_gt01_cnt AS over_cnt,
+        if(t3.np_gt01_cnt >= 8, '是', '否') as over_flag,
+        t3.np_gt01_dis_ss_gt16_cnt as over16_cnt,
+        if(t3.np_gt01_dis_ss_gt16_cnt >= 8, '是', '否') as over16_flag
+        FROM (SELECT tmp.cell_id,
+        MIN(tmp.cell_name) AS cell_name,
+        COUNT( CASE WHEN tmp.ncell_per > 0.01 THEN 1 END ) as np_gt01_cnt,
+        COUNT( CASE WHEN tmp.ncell_per > 0.01 AND tmp.dis > tmp.station_space * 1.6 THEN 1 END ) as np_gt01_dis_ss_gt16_cnt
+        FROM (SELECT t1.cell_id,
+        t2.cell_name,
+        t2.station_space,
+        t1.ncell_cnt / t1.total_cnt as ncell_per,
+        t1.dis
+        from (select cell_id,
+        filteredrsrptimes1 as ncell_cnt,
+        filteredmixingsum  as total_cnt,
+        distance_km        as dis
+        from lte_mr_data
+        WHERE area_id = #{cityId}
+        AND record_time >= #{begTime}
+        AND record_time &lt;= #{endTime}) t1
+        INNER JOIN (SELECT cell_id, cell_name, station_space
+        from lte_cell_param
+        where area_id = #{cityId}) t2
+        on t1.cell_id = t2.cell_id) tmp
+        GROUP BY tmp.cell_id) t3
+        LEFT JOIN (select cell_id,
+        if(sc_Gt110_Gt0_Cnt / total_cnt > 0.6 and total_cnt > 100, '是', '否') as weak_flag,
+        if(sc_Gt110_Nc_Sc_Gt6_Gt3_Cnt / total_cnt > 0.1 and total_cnt > 100, '是', '否') as overlap_flag
+        from lte_structure_data
+        WHERE area_id = #{cityId}
+        AND record_date >= #{begTime}
+        AND record_date &lt;= #{endTime}) t4
+        on t3.cell_id = t4.cell_id
+        <!-- ]]> -->
+    </select>
+
+    <insert id="handleOverCover" parameterType="map">
+        <!-- <![CDATA[ -->
+        INSERT overwrite TABLE
+        RNO_MS_LTE_STRUC_OC_RES PARTITION(area_id = #{cityId}, job_id = #{jobId})
+        SELECT
+        t1.cell_id,
+        t2.cell_name,
+        t1.cell_pci,
+        t1.cell_earfcn,
+        t2.lon AS cell_lon,
+        t2.lat AS cell_lat,
+        t2.station_space,
+        t1.ncell_id,
+        t3.cell_name AS ncell_name,
+        t1.ncell_pci,
+        t1.ncell_earfcn,
+        t3.lon AS ncell_lon,
+        t3.lat AS ncell_lat,
+        t1.ncell_cnt,
+        t1.total_cnt,
+        t1.ncell_cnt / t1.total_cnt AS ncell_per,
+        t1.dis
+        FROM
+        (
+        SELECT
+        cell_id,
+        cell_pci,
+        cell_earfcn,
+        ncell_id,
+        ncell_pci,
+        ncell_earfcn,
+        filteredrsrptimes1 as ncell_cnt,
+        filteredmixingsum as total_cnt,
+        distance_km AS dis
+        FROM
+        lte_mr_data
+        WHERE
+        area_id = #{cityId}
+        AND record_time >= #{begTime}
+        AND record_time &lt;= #{endTime}
+        ) t1
+        INNER JOIN(
+        SELECT
+        cell_id,
+        cell_name,
+        longitude AS lon,
+        latitude AS lat,
+        station_space
+        FROM
+        lte_cell_param
+        WHERE
+        area_id = #{cityId}
+        ) t2 ON
+        t1.cell_id = t2.cell_id
+        INNER JOIN(
+        SELECT
+        cell_id,
+        cell_name,
+        longitude AS lon,
+        latitude AS lat
+        FROM
+        lte_cell_param
+        WHERE
+        area_id = #{cityId}
+        ) t3 ON
+        t1.ncell_id = t3.cell_id
+        <!-- ]]> -->
+    </insert>
+
+    <select id="queryOverCoverResultByJobId" resultType="com.hgicreate.rno.ltestrucanlsservice.model.OverCover">
+        SELECT
+        t.CELL_ID,
+        t.CELL_NAME,
+        t.CELL_PCI,
+        t.CELL_EARFCN,
+        t.CELL_LON,
+        t.CELL_LAT,
+        t.STATION_SPACE,
+        t.NCELL_ID,
+        t.NCELL_NAME,
+        t.NCELL_PCI,
+        t.NCELL_EARFCN,
+        t.NCELL_LON,
+        t.NCELL_LAT,
+        t.NCELL_CNT,
+        t.TOTAL_CNT,
+        t.NCELL_PER,
+        t.DIS
+        FROM RNO_MS_LTE_STRUC_OC_RES t
+        WHERE t.job_id = #{jobId}
+    </select>
+</mapper>
+ 

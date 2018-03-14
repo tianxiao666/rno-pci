@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+ 
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hgicreate.rno.ltestrucanlsservice.mapper.oracle.CommonMapper">
+	<!-- 配置映射字段 -->
+	<insert id="addOneReport" parameterType="com.hgicreate.rno.ltestrucanlsservice.model.Report">
+		<selectKey keyProperty="reportId" resultType="Long" order="BEFORE">
+			SELECT seq_rno_ms_job_report.NEXTVAL FROM DUAL
+		</selectKey>
+		insert into rno_ms_job_report
+		  (report_id,
+		   job_id,
+		   stage,
+		   beg_time,
+		   end_time,
+		   state,
+		   report_type,
+		   att_msg)
+		values
+		  (#{reportId},
+		   #{jobId},
+		   #{stage},
+		   #{begTime},
+		   #{endTime},
+		   #{finishState},
+		   #{reportType},
+		   #{attMsg})
+	</insert>
+
+	<sql id="reportColumns"> REPORT_ID, JOB_ID, STAGE, BEG_TIME, END_TIME, FINISH_STATE, ATT_MSG </sql>
+
+	<select id="queryReportCnt" parameterType="long" resultType="Long">
+		select count(1)
+		from rno_ms_job_report
+		where report_type = 1
+		and job_id = #{jobId}
+	</select>
+
+	<select id="queryReportByPage" parameterType="map" resultType="com.hgicreate.rno.ltestrucanlsservice.model.Report">
+		<!--<![CDATA[-->
+		select <include refid="reportColumns" />
+		from (select <include refid="reportColumns" />, rownum AS rn
+		from (select REPORT_ID,
+		JOB_ID,
+		STAGE,
+		TO_CHAR(BEG_TIME, 'YYYY-MM-DD HH24:MI:SS') BEG_TIME,
+		TO_CHAR(END_TIME, 'YYYY-MM-DD HH24:MI:SS') END_TIME,
+		STATE as FINISH_STATE,
+		ATT_MSG
+		from rno_ms_job_report
+		where report_type = 1
+		and job_id = #{jobId}
+		order by REPORT_ID))
+		where rn >= #{start}
+		and rn &lt;= #{end}
+		<!-- ]]> -->
+	</select>
+</mapper>
+ 

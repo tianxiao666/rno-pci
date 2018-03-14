@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hgicreate.rno.lteazimuthevaluation.mapper.oracle.OracleMapper">
+    <insert id="addLteAzimuthEvaluationJob" parameterType="com.hgicreate.rno.lteazimuthevaluation.model.AzimuthJobRecord">
+        INSERT INTO RNO_MS_LTE_AZIMUTH_ASSES_JOB (JOB_ID, BEG_MEA_TIME, END_MEA_TIME, CITY_ID, DL_FILE_NAME, FINISH_STATE, STATUS, CREATE_TIME, MOD_TIME, EVAL_TYPE)
+        VALUES (#{jobId},
+        to_date(#{begMeaTime}, 'yyyy-MM-dd'),
+        to_date(#{endMeaTime}, 'yyyy-MM-dd'),
+        #{cityId},
+        #{dlFileName},
+        #{finishState},
+        'N',
+        to_date(#{createTime}, 'yyyy-MM-dd HH24:mi:ss'),
+        to_date(#{modTime}, 'yyyy-MM-dd HH24:mi:ss'),
+        #{evalType})
+    </insert>
+
+    <select id="queryLteAzimuthEvaluationJobRecByJobId" parameterType="long" resultType="com.hgicreate.rno.lteazimuthevaluation.model.AzimuthJobRecord">
+        SELECT
+            t.Job_Id,
+            to_char(t.Beg_Mea_Time, 'yyyyMMdd') as Beg_Mea_Time,
+            to_char(t.End_Mea_Time, 'yyyyMMdd') as End_Mea_Time,
+            t.City_Id,
+            SA.NAME                               AS CITY_NAME,
+            t.Dl_File_Name,
+            t.Finish_State,
+            t.Status,
+            t.Create_Time,
+            t.Mod_Time,
+            t.Eval_Type
+        FROM RNO_MS_LTE_AZIMUTH_ASSES_JOB t,
+            SYS_AREA SA
+        WHERE SA.AREA_ID = T.CITY_ID
+              AND t.JOB_ID = #{jobId}
+        ORDER BY t.CREATE_TIME DESC
+    </select>
+
+    <update id="updateLteAzimuthEvaluationStatus" parameterType="map">
+        UPDATE RNO_MS_LTE_AZIMUTH_ASSES_JOB t
+        SET t.finish_state = #{jobStatus}
+        WHERE t.job_id = #{jobId}
+    </update>
+</mapper>

@@ -1,0 +1,4 @@
+spring.cloud.config.uri=http://192.168.6.71:8888
+spring.application.name=rno-dynamic-coverage  
+#name,profile 
+spring.cloud.config.profile=dev

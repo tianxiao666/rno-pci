@@ -1,0 +1,164 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<title>新增4g干扰矩阵(新算法)</title>
+<meta charset="UTF-8" />
+<link href="css/jquery-ui.css" rel="stylesheet" />
+<link href="css/jquery-ui-1.10.3.custom.min.css" rel="stylesheet" />
+<link href="css/jquery-ui-datepicker.css" rel="stylesheet" />
+<link href="css/jquery-ui-timepicker-addon.css" rel="stylesheet" />
+<link href="css/base.css" rel="stylesheet" />
+<link href="css/input.css" rel="stylesheet" />
+<link href="css/public.css" rel="stylesheet" />
+<link href="css/public-table.css" rel="stylesheet" />
+<link href="css/public-table-standard.css" rel="stylesheet" />
+<link href="css/layer.css" rel="stylesheet" />
+<link href="css/iscreate-paging.css" rel="stylesheet" />
+<link href="css/loading_cover.css" rel="stylesheet" />
+<script src="js/jquery/1.9.1/jquery.min.js"></script>
+<script src="js/jquery/plugins/jquery-ui.min.js"></script>
+<script src="js/jquery/plugins/jquery-ui-timepicker-addon.js"></script>
+<script src="js/jquery/plugins/i18n/jquery-ui-datepicker-zh-CN.js"></script>
+<script src="js/jquery/plugins/i18n/jquery-ui-timepicker-zh-CN.js"></script>
+<script src="js/jquery/plugins/jquery.form.js"></script>
+<script type="text/javascript" src="js/rno_lte_interfer_martix_add_new.js"></script>
+</head>
+<body>
+	<div class="loading_cover" id="loadingDataDiv" style="display: none">
+		<div class="cover"></div>
+		<h4 class="loading">
+			 <em class="loading_fb" id="loadContentId"></em>,请稍侯...
+		</h4>
+	</div>
+	
+	<font style="font-weight: bold;">当前位置： PCI优化 &gt; 干扰矩阵计算(新算法) &gt; 新计算</font>
+	<br/>
+    <div style="width: 80%;margin-top: 5px; margin-left: 6%;">
+ 	   	<div style="margin-bottom: 5px;text-align:center">
+ 	 	<a th:href="'/'+${session.userId}" style="text-decoration: underline;font-weight: bold;">&lt;&lt;返回任务列表</a><br/>
+ 	 	</div>
+ 	 	<div style="margin-top: 10px;">
+	    <form id="interferMartixAddMrForm" method="post">
+	    	<input type="hidden" id="hiddenPageSize" name="hiddenPageSize" value="25" /> 
+			<input type="hidden" id="hiddenCurrentPage" name="hiddenCurrentPage" value="1" /> 
+			<input type="hidden" id="hiddenTotalPageCnt" name="hiddenTotalPageCnt" /> 
+			<input type="hidden" id="hiddenTotalCnt" name="hiddenTotalCnt"/>
+	   	 	<input type="hidden" id="sffiles" name="sffiles" value="" />
+	   	 	<input type="hidden" id="sffilecounts" name="sffilecounts" value=""/>
+ 
+		    <table class="main-table1 half-width" style="padding-top: 10px;">
+					<tr>
+						<td  colspan="2" style="text-align: left">
+							省：<select id="provinceId2"
+							name="provinceId2" class="required"
+							onchange="getSubAreas('provinceId2','cityId2')">
+							<option th:each="province:${provinces}"
+								th:value="${province.areaId}" th:text="${province.name}">广东省</option>
+						</select>市：<select id="cityId2" name="cityId2" class="required">
+							<option th:each="city:${cities}" th:value="${city.areaId}"
+								th:text="${city.name}">广州市</option>
+						</select> <input type="hidden" name="allAreas" id="allAreas"
+							th:value="${allAreas}" />
+							&nbsp;&nbsp;&nbsp;
+							<span id="isCalculateTip" 
+								style="font:13px/1.5 Tahoma,'Microsoft Yahei','Simsun';color :red"></span>
+						</td>
+					</tr>
+					<tr>
+						<td style="text-align: left;">
+							<!-- <div style="margin: 11px"></div> -->
+							<span style ="white-space:nowrap;">数据测量时间&nbsp;&nbsp;从
+							<input id="begTime" name="begTime" value="" type="text" style="width: 132px;" />
+							到 
+							<input id="latestAllowedTime" name="latestAllowedTime" value="" type="text" style="width: 132px;" />
+								&nbsp;&nbsp;任务名<input id="taskName" name="taskName"  maxlength="30"  type="text"  style="width: 132px;" onblur="checkProviderTaskName();"/>
+								&nbsp;&nbsp;<a href="javascript:checkProviderTaskName();">检查唯一性</a>
+								&nbsp;&nbsp;<span id="taskName_error" class="red"></span><span id="taskName_flag" style="color:#008000;"></span>
+							</span>
+							<select id="dataType" name="dataType" hidden="hidden">
+								<option value='ALL' selected="selected">全部</option>
+								<option value='MR'>MR</option>
+								<option value='HO'>HO</option>
+							</select>
+						</td>
+						<td style="text-align: left;white-space:nowrap;">
+						<!-- <div style="margin: 11px"></div> -->
+							<input id="showMrData" type="button" name="search"
+							 style="width: 90px;" value="查看MR数据" onclick=""/>
+							 <span id="isDateRightTip" 
+								style="font:13px/1.5 Tahoma,'Microsoft Yahei','Simsun';color :red"></span>
+							<input id="showHoData" type="button" name="search"
+							 style="width: 90px;" value="查看HO数据" onclick=""/>
+							 <span id="isHoDateRightTip" 
+								style="font:13px/1.5 Tahoma,'Microsoft Yahei','Simsun';color :red"></span>
+							<input id="isUseSf" class="forcheck" type="checkbox" name="isUseSf" />使用扫频数据
+							 <span id="sfFileInfo" style="display:none;font:13px/1.5 Tahoma,'Microsoft Yahei','Simsun';color :blue">
+							 （选完扫频数据后请点击确认）</span>
+							<input id="sfFileBtn" type='button' style='display:none;' value='确认' onclick='getFileName()'/>
+						</td>
+					</tr>
+					<tr>
+						<td colspan="2" style=" text-align: left;">
+						<span style ="white-space:nowrap;">同频小区相关系数权值Kss:
+						<input id="SAMEFREQCELLCOEFWEIGHT" name="SAMEFREQCELLCOEFWEIGHT" value="0.80" type="text" />
+						Kss=1-Kho，修改其中一个，另一个自动调整 
+						</span>
+						</td>
+					</tr>
+					<tr>
+						<td colspan="2" style=" text-align: left;">
+						<span style ="white-space:nowrap;">切换比例权值Kho:
+						<input id="SWITCHRATIOWEIGHT" name="SWITCHRATIOWEIGHT" value="0.20" type="text" />
+						Kho=1-Kss，修改其中一个，另一个自动调整 
+						</span>
+						</td>
+					</tr>
+					<tr>
+						<td colspan="2" style=" text-align: left;">
+							<!-- <div style="margin: 11px"></div> -->
+							<input type="hidden" id="hiddenPageSize" name="jobType" value="CALC_LTE_INTERFER_MATRIX_NEW" /> 
+							<input id="calculateInterMartix" type="button" style="width: 90px;" value="开始计算" /><!--  onclick="this.disabled=true;" -->
+						</td>
+					</tr>
+			</table>
+		</form>
+		</div>
+	</div>
+	
+	
+	<div style="width: 80%;margin-left: 6%;padding-top: 10px">
+		<table id="mrDataTable" class="greystyle-standard" width="80%">
+		</table>
+		<table>
+		   <div class="paging_div" id="mrDataPageDiv"
+				style="border: 1px solid #ddd;">
+				<span class="mr10">共 <em id="emTotalCnt" class="blue">0</em>
+					条记录
+				</span> <a class="paging_link page-first" title="首页"
+					onclick="showListViewByPage('first',loadMrData,'interferMartixAddMrForm','mrDataPageDiv')"></a>
+				<a class="paging_link page-prev" title="上一页"
+					onclick="showListViewByPage('back',loadMrData,'interferMartixAddMrForm','mrDataPageDiv')"></a>
+				第 <input type="text" id="showCurrentPage" class="paging_input_text"
+					value="0" /> 页/<em id="emTotalPageCnt">0</em>页 <a
+					class="paging_link page-go" title="GO"
+					onclick="showListViewByPage('num',loadMrData,'interferMartixAddMrForm','mrDataPageDiv')">GO</a>
+				<a class="paging_link page-next" title="下一页"
+					onclick="showListViewByPage('next',loadMrData,'interferMartixAddMrForm','mrDataPageDiv')"></a>
+				<a class="paging_link page-last" title="末页"
+					onclick="showListViewByPage('last',loadMrData,'interferMartixAddMrForm','mrDataPageDiv')"></a>
+	       </div>
+		</table>
+	</div>
+	
+	<div id="operInfo"
+		style="display:none; top:40px;left:600px;z-index:999;width:400px; height:40px; background-color:#7dff3f; filter:alpha(Opacity=80);-moz-opacity:0.5;opacity: 0.5;z-index:9999;position: fixed;">
+		<table height="100%" width="100%" style="text-align:center">
+			<tr>
+				<td><span id="operTip"></span></td>
+			</tr>
+		</table>
+
+	</div>
+	<span id="sessionId" hidden="" th:text="${session.account}"></span>
+</body>
+</html>

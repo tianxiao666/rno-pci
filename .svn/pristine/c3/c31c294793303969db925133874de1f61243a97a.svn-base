@@ -1,0 +1,11 @@
+datasource.oracle.name=oracle
+datasource.oracle.url=jdbc:oracle:thin:@192.168.50.20:1521:rnodb
+datasource.oracle.username=rno
+datasource.oracle.password=opsoR514123
+datasource.oracle.driverClassName=oracle.jdbc.driver.OracleDriver
+
+datasource.spark.name=spark
+datasource.spark.url=jdbc:hive2://192.168.50.85:10016/prod
+datasource.spark.username=hive
+datasource.spark.password=
+datasource.spark.driverClassName=org.apache.hive.jdbc.HiveDriver

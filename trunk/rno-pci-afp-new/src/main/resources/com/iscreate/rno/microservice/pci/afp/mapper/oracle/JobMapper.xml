@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.iscreate.rno.microservice.pci.afp.mapper.oracle.OracleMapper">
+	<!-- 配置映射字段 -->
+	<insert id="addJob" parameterType="com.iscreate.rno.microservice.pci.afp.model.JobProfile">
+		<selectKey keyProperty="jobId" resultType="long" order="BEFORE">
+			SELECT seq_rno_ms_job.NEXTVAL FROM DUAL
+		</selectKey>
+		insert into rno_ms_job
+		(JOB_ID, JOB_NAME, CREATOR, PRIORITY, CREATE_TIME, JOB_TYPE, STATUS, JOB_RUNNING_STATUS)
+		values
+		(#{jobId, jdbcType=NUMERIC},
+		#{jobName, jdbcType=VARCHAR},
+		#{account, jdbcType=VARCHAR},
+		#{priority, jdbcType=NUMERIC},
+		#{submitTime, jdbcType=DATE},
+		#{jobType, jdbcType=VARCHAR},
+		#{status, jdbcType=VARCHAR},
+		#{jobStateStr, jdbcType=VARCHAR})
+	</insert>
+	<update id="updateJobBegTime" parameterType="com.iscreate.rno.microservice.pci.afp.model.JobProfile">
+		update rno_ms_job set LAUNCH_TIME = #{launchTime} where job_id =
+		#{jobId}
+	</update>
+	<update id="updateJobEndTime" parameterType="com.iscreate.rno.microservice.pci.afp.model.JobProfile">
+		update rno_ms_job
+		set COMPLETE_TIME = #{finishTime},
+		JOB_RUNNING_STATUS = #{jobStateStr}
+		where job_id = #{jobId}
+	</update>
+	<update id="updateJobRunningStatus" parameterType="com.iscreate.rno.microservice.pci.afp.model.JobProfile">
+		update rno_ms_job
+		set JOB_RUNNING_STATUS = #{jobStateStr}
+		where
+		job_id = #{jobId}
+	</update>
+	<select id="getJoBId" parameterType="com.iscreate.rno.microservice.pci.afp.model.JobProfile" resultType="String">
+		select job_id
+		from(select job_id
+		from rno_ms_job
+		where
+		job_running_status =#{jobStateStr}
+		and job_type=#{jobType}
+		and rownum &lt; 2
+		order by create_time desc)
+	</select>
+</mapper>
+ 

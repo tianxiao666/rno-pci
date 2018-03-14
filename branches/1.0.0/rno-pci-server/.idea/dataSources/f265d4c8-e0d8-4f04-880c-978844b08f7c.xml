@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dataSource name="Greenplum - gpadmin@192.168.9.66">
+  <database-model serializer="dbm" rdbms="POSTGRES" format-version="4.4">
+    <root id="1"/>
+    <database id="2" parent="1" name="gpadmin">
+      <Current>1</Current>
+      <Visible>1</Visible>
+    </database>
+    <schema id="3" parent="2" name="gp_toolkit"/>
+    <schema id="4" parent="2" name="information_schema"/>
+    <schema id="5" parent="2" name="pg_aoseg"/>
+    <schema id="6" parent="2" name="pg_bitmapindex"/>
+    <schema id="7" parent="2" name="pg_catalog"/>
+    <schema id="8" parent="2" name="public">
+      <Current>1</Current>
+      <Visible>1</Visible>
+    </schema>
+    <table id="9" parent="8" name="dim_cfg_antenna"/>
+    <table id="10" parent="8" name="dim_cfg_cell"/>
+    <table id="11" parent="8" name="dim_cfg_cellantenna"/>
+    <table id="12" parent="8" name="m_mro_ncell_rsrp_diff"/>
+    <table id="13" parent="8" name="m_pm_ncell"/>
+    <column id="14" parent="9" name="ant_cuid">
+      <Position>1</Position>
+      <DataType>varchar(255)|12</DataType>
+    </column>
+    <column id="15" parent="9" name="azimuth">
+      <Position>2</Position>
+      <DataType>int4(10)|4</DataType>
+    </column>
+    <column id="16" parent="10" name="cgi">
+      <Position>1</Position>
+      <DataType>varchar(128)|12</DataType>
+      <NotNull>1</NotNull>
+    </column>
+    <column id="17" parent="10" name="cell_name">
+      <Position>2</Position>
+      <DataType>varchar(128)|12</DataType>
+    </column>
+    <column id="18" parent="10" name="enodeb_id">
+      <Position>3</Position>
+      <DataType>varchar(128)|12</DataType>
+    </column>
+    <column id="19" parent="10" name="city">
+      <Position>4</Position>
+      <DataType>varchar(100)|12</DataType>
+    </column>
+    <column id="20" parent="10" name="freq">
+      <Position>5</Position>
+      <DataType>varchar(20)|12</DataType>
+    </column>
+    <column id="21" parent="10" name="channelnum">
+      <Position>6</Position>
+      <DataType>int4(10)|4</DataType>
+    </column>
+    <column id="22" parent="10" name="pci">
+      <Position>7</Position>
+      <DataType>int4(10)|4</DataType>
+    </column>
+    <column id="23" parent="10" name="boundary_type">
+      <Position>8</Position>
+      <DataType>varchar(30)|12</DataType>
+    </column>
+    <column id="24" parent="10" name="road_longitude">
+      <Position>9</Position>
+      <DataType>numeric(22,6)|2</DataType>
+    </column>
+    <column id="25" parent="10" name="road_latitude">
+      <Position>10</Position>
+      <DataType>numeric(22,6)|2</DataType>
+    </column>
+    <key id="26" parent="10" name="dim_cfg_cell_pkey">
+      <ColNames>cgi</ColNames>
+      <Primary>1</Primary>
+    </key>
+    <column id="27" parent="11" name="cgi">
+      <Position>1</Position>
+      <DataType>varchar(128)|12</DataType>
+    </column>
+    <column id="28" parent="11" name="ant_id">
+      <Position>2</Position>
+      <DataType>varchar(128)|12</DataType>
+    </column>
+    <column id="29" parent="11" name="curr_flag">
+      <Position>3</Position>
+      <DataType>bool(1)|-7</DataType>
+    </column>
+    <column id="30" parent="11" name="eff_from_date">
+      <Position>4</Position>
+      <DataType>timestamp(29,6)|93</DataType>
+    </column>
+    <column id="31" parent="11" name="eff_to_date">
+      <Position>5</Position>
+      <DataType>timestamp(29,6)|93</DataType>
+    </column>
+    <column id="32" parent="12" name="starttime">
+      <Position>1</Position>
+      <DataType>timestamp(29,6)|93</DataType>
+      <NotNull>1</NotNull>
+    </column>
+    <column id="33" parent="12" name="cgi">
+      <Position>2</Position>
+      <DataType>varchar(128)|12</DataType>
+      <NotNull>1</NotNull>
+    </column>
+    <column id="34" parent="12" name="nei_cgi">
+      <Position>3</Position>
+      <DataType>varchar(128)|12</DataType>
+      <NotNull>1</NotNull>
+    </column>
+    <column id="35" parent="12" name="ncrsrp0">
+      <Position>4</Position>
+      <DataType>int4(10)|4</DataType>
+    </column>
+    <column id="36" parent="12" name="ncrsrp1">
+      <Position>5</Position>
+      <DataType>int4(10)|4</DataType>
+    </column>
+    <column id="37" parent="12" name="ncrsrp2">
+      <Position>6</Position>
+      <DataType>int4(10)|4</DataType>
+    </column>
+    <column id="38" parent="12" name="ncrsrp3">
+      <Position>7</Position>
+      <DataType>int4(10)|4</DataType>
+    </column>
+    <column id="39" parent="12" name="total_num">
+      <Position>8</Position>
+      <DataType>int4(10)|4</DataType>
+    </column>
+    <column id="40" parent="12" name="nc_total_num">
+      <Position>9</Position>
+      <DataType>int4(10)|4</DataType>
+    </column>
+    <column id="41" parent="12" name="distince">
+      <Position>10</Position>
+      <DataType>int4(10)|4</DataType>
+    </column>
+    <key id="42" parent="12" name="m_mro_ncell_rsrp_diff_pkey">
+      <ColNames>starttime
+cgi
+nei_cgi</ColNames>
+      <Primary>1</Primary>
+    </key>
+    <column id="43" parent="13" name="cgi">
+      <Position>1</Position>
+      <DataType>varchar(128)|12</DataType>
+      <NotNull>1</NotNull>
+    </column>
+    <column id="44" parent="13" name="nei_cgi">
+      <Position>2</Position>
+      <DataType>varchar(128)|12</DataType>
+      <NotNull>1</NotNull>
+    </column>
+    <column id="45" parent="13" name="succoutperrelation">
+      <Position>3</Position>
+      <DataType>int8(19)|-5</DataType>
+    </column>
+    <column id="46" parent="13" name="attoutperrelation">
+      <Position>4</Position>
+      <DataType>int8(19)|-5</DataType>
+    </column>
+    <key id="47" parent="13" name="m_pm_ncell_pkey">
+      <ColNames>cgi
+nei_cgi</ColNames>
+      <Primary>1</Primary>
+    </key>
+  </database-model>
+</dataSource>

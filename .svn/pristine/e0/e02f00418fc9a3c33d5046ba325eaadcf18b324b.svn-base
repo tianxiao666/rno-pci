@@ -1,0 +1,15 @@
+# DB Connection Setting
+datasource.oracle.name=oracle
+datasource.oracle.url=jdbc:oracle:thin:@192.168.6.40:1521:testora
+datasource.oracle.username=iosm_test2
+datasource.oracle.password=123456
+datasource.oracle.driverClassName=oracle.jdbc.driver.OracleDriver
+
+datasource.spark.name=spark
+datasource.spark.url=jdbc:hive2://192.168.6.101:10016/dev
+datasource.spark.username=hive
+datasource.spark.password=
+datasource.spark.driverClassName=org.apache.hive.jdbc.HiveDriver
+
+rno.run-mode=always
+rno.download-file-path=/tmp/interfermatrix/download

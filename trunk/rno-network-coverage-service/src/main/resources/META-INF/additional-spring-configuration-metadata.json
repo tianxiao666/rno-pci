@@ -1,0 +1,37 @@
+{"properties": [
+  {
+    "name": "rno.hbase-namespace",
+    "type": "java.lang.String",
+    "description": "HBase 的 namespace，缺省是 default"
+  },
+  {
+    "name": "rno.run-mode",
+    "type": "java.lang.String",
+    "description": "RNO 微服务的运行模式，值可以是 always, scheduler, never"
+  },
+  {
+    "name": "rno.hbase-commit-lines",
+    "type": "java.lang.String",
+    "description": "HBase 批量提交行数，缺省值为10000"
+  },
+  {
+    "name": "rno.hdfs-file-path",
+    "type": "java.lang.String",
+    "description": "上传到hdfs的文件路径"
+  },
+  {
+    "name": "scheduler.fixed-delay",
+    "type": "java.lang.String",
+    "description": "任务执行的延迟时间"
+  },
+  {
+    "name": "rno.local-flow-file-path",
+    "type": "java.lang.String",
+    "description": "流量文件下载目录"
+  },
+  {
+    "name": "rno.download-file-path",
+    "type": "java.lang.String",
+    "description": "结果文件下载目录"
+  }
+]}

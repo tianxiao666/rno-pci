@@ -1,0 +1,190 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<title>干扰矩阵计算(新算法)</title>
+<meta charset="UTF-8" />
+<link href="css/jquery-ui.css" rel="stylesheet" />
+<link href="css/jquery-ui-1.10.3.custom.min.css" rel="stylesheet" />
+<link href="css/jquery-ui-datepicker.css" rel="stylesheet" />
+<link href="css/jquery-ui-timepicker-addon.css" rel="stylesheet" />
+<link href="css/base.css" rel="stylesheet" />
+<link href="css/input.css" rel="stylesheet" />
+<link href="css/public.css" rel="stylesheet" />
+<link href="css/public-table.css" rel="stylesheet" />
+<link href="css/public-table-standard.css" rel="stylesheet" />
+<link href="css/layer.css" rel="stylesheet" />
+<link href="css/iscreate-paging.css" rel="stylesheet" />
+<link href="css/loading_cover.css" rel="stylesheet" />
+<script src="js/jquery/1.9.1/jquery.min.js"></script>
+<script src="js/jquery/plugins/jquery-ui.min.js"></script>
+<script src="js/jquery/plugins/jquery-ui-timepicker-addon.js"></script>
+<script src="js/jquery/plugins/i18n/jquery-ui-datepicker-zh-CN.js"></script>
+<script src="js/jquery/plugins/i18n/jquery-ui-timepicker-zh-CN.js"></script>
+<script src="js/jquery/plugins/jquery.form.js"></script>
+<script type="text/javascript" src="js/rno_lte_interfer_martix_manage_new.js"></script>
+</head>
+<!--    <input type="hidden" id="cityIdFromRes" value="<s:property value='cityId'/>" />  -->
+<body>
+	<div class="loading_cover" id="loadingDataDiv" style="display:none">
+		<div class="cover"></div>
+		<h4 class="loading">
+			<em class="loading_fb" id="loadContentId"></em>,请稍侯...
+		</h4>
+	</div>
+
+	<font style="font-weight: bold;">当前位置： PCI优化 > 干扰矩阵计算(新算法)</font>
+	<br/>
+
+	<div id="taskProfileDiv">
+		<div style="width: 80%;margin-top: 20px; margin-left: 6%;">
+			<form id="interferMartixForm" method="post">
+				<input type="hidden" id="hiddenPageSize" name="hiddenPageSize"
+					value="25" /> <input type="hidden" id="hiddenCurrentPage"
+					name="hiddenCurrentPage" value="1" /> <input type="hidden"
+					id="hiddenTotalPageCnt" name="hiddenTotalPageCnt" /> <input type="hidden"
+					id="hiddenTotalCnt"  name="hiddenTotalCnt"/>
+
+				<table class="main-table1 half-width" style="padding-top: 10px;">
+					<tr>
+							<td style="text-align: left">省：<select id="provincemenu"
+							name="provincemenu" class="required"
+							onchange="getSubAreas('provincemenu','citymenu')">
+							<option th:each="province:${provinces}"
+								th:value="${province.areaId}" th:text="${province.name}">广东省</option>
+						</select>市：<select id="citymenu" name="citymenu" class="required">
+							<option th:each="city:${cities}" th:value="${city.areaId}"
+								th:text="${city.name}">广州市</option>
+						</select> <input type="hidden" name="allAreas" id="allAreas"
+							th:value="${allAreas}" />
+						</td>
+						<td style="text-align: left">类型：<select
+							name="interMartixType" id="interMartixType">
+								<option value='ALL'>全部</option>
+								<!-- <option value='MR'>MR</option> -->
+						</select></td>
+
+						<td style="text-align: left">干扰矩阵创建时间：<input type="text" id="begTime"
+							name="begTime" value="" style="width: 132px;" class="required" /> 到  <input
+							id="latestAllowedTime" name="latestAllowedTime" type="text"
+							value="" style="width: 132px;" class="required" />
+						</td>
+					</tr>
+					<tr>
+						<td colspan="3" style=" text-align: left;">
+							<div style="margin: 11px"></div> <input id="searchInterMartix"
+							type="button" name="search" style="width: 90px;" value="查 询"
+							onclick=""/>
+						</td>
+					</tr>
+				</table>
+			</form>
+		</div>
+
+		<div style="width: 80%;margin-left: 6%;padding-top: 10px">
+			<table width="50%">
+				<tbody>
+					<tr>
+						<td style="width: 5%">
+							<p>
+								<font style="font-weight: bold">4G干扰矩阵列表</font>
+							</p>
+						</td>
+						<td style="width: 2%;"><input id="addInterMartix"
+							type="button" style="width: 90px;" value="新计算" onclick=""/>
+						</td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+
+		<div style="width: 80%;margin-left: 6%;padding-top: 10px">
+			<table id="interferMartixTable" class="greystyle-standard"
+				width="80%">
+				<tr>
+					<th style="width: 4%">地市</th>
+					<th style="width: 8%">任务名</th>
+					<th style="width: 12%">运行时间</th>
+					<th style="width: 12%">测量时间</th>
+					<th style="width: 4%">数据类型</th>
+					<th style="width: 4%">总数据量</th>
+					<th style="width: 8%">数据详情</th>
+					<th style="width: 12%">参数详情</th>
+					<th style="width: 8%">状态</th>
+					<th style="width: 8%">操作</th>
+				</tr>
+			</table>
+			<table>
+				<div class="paging_div" id="interMartixPageDiv"
+				style="border: 1px solid #ddd;">
+				<span class="mr10">共 <em id="emTotalCnt" class="blue">0</em>
+					条记录
+				</span> <a class="paging_link page-first" title="首页"
+					onclick="showListViewByPage('first',sumbitInterferMartixForm,'interferMartixForm','interMartixPageDiv')"></a>
+				<a class="paging_link page-prev" title="上一页"
+					onclick="showListViewByPage('back',sumbitInterferMartixForm,'interferMartixForm','interMartixPageDiv')"></a>
+				第 <input type="text" id="showCurrentPage" class="paging_input_text"
+					value="0" /> 页/<em id="emTotalPageCnt">0</em>页 <a
+					class="paging_link page-go" title="GO"
+					onclick="showListViewByPage('num',sumbitInterferMartixForm,'interferMartixForm','interMartixPageDiv')">GO</a>
+				<a class="paging_link page-next" title="下一页"
+					onclick="showListViewByPage('next',sumbitInterferMartixForm,'interferMartixForm','interMartixPageDiv')"></a>
+				<a class="paging_link page-last" title="末页"
+					onclick="showListViewByPage('last',sumbitInterferMartixForm,'interferMartixForm','interMartixPageDiv')"></a>
+			    </div>
+			</table>
+			<form id='download4GMatrixFileForm'
+				action='downloadNewLteInterMatrixFile' method='post'
+				style="display:none">
+				<input type='input' id='jobId' name='jobId' value='' />
+			</form>
+		</div>
+	</div>
+
+	<div id="taskReportDiv" style="display:none">
+		<div style="width: 80%;margin-top: 20px; margin-left: 6%;">
+			<form id="viewReportForm">
+				<input type="hidden" name="jobId" id="hiddenJobId"
+					value="" /> <input type="hidden" id="hiddenPageSize"
+					name="hiddenPageSize" value="25" /> <input type="hidden"
+					id="hiddenCurrentPage" name="hiddenCurrentPage" value="1" /> <input
+					type="hidden" id="hiddenTotalPageCnt" name="hiddenTotalPageCnt"/> <input type="hidden"
+					id="hiddenTotalCnt" value="-1" name="hiddenTotalCnt" />
+			</form>
+			<ul id="icons" class="ui-widget ui-helper-clearfix"
+				style="width:100px;cursor:pointer">
+				<li class="ui-state-default ui-corner-all" title="返回列表"
+					style="width:100px" onclick="javascript:returnToTaskList();">
+					&lt;&lt; 返回列表</li>
+			</ul>
+			<table id="reportListTab" class="greystyle-standard"
+				style="width:100%;margin-left:0">
+				<thead>
+					<th>阶段</th>
+					<th>开始时间</th>
+					<th>结束</th>
+					<th>结果</th>
+					<th>详细信息</th>
+				</thead>
+			</table>
+			<div class="paging_div" id="reportListPageDiv"
+				style="border: 1px solid #ddd">
+				<span class="mr10">共 <em id="emTotalCnt" class="blue">0</em>
+					条记录
+				</span> <a class="paging_link page-first" title="首页"
+					onclick="showListViewByPage('first',queryReportData,'viewReportForm','reportListPageDiv')"></a>
+				<a class="paging_link page-prev" title="上一页"
+					onclick="showListViewByPage('back',queryReportData,'viewReportForm','reportListPageDiv')"></a>
+				第 <input type="text" id="showCurrentPage" class="paging_input_text"
+					value="0" /> 页/<em id="emTotalPageCnt">0</em>页 <a
+					class="paging_link page-go" title="GO"
+					onclick="showListViewByPage('num',queryReportData,'viewReportForm','reportListPageDiv')">GO</a>
+				<a class="paging_link page-next" title="下一页"
+					onclick="showListViewByPage('next',queryReportData,'viewReportForm','reportListPageDiv')"></a>
+				<a class="paging_link page-last" title="末页"
+					onclick="showListViewByPage('last',queryReportData,'viewReportForm','reportListPageDiv')"></a>
+			</div>
+		</div>
+	</div>
+	<span id="sessionId" hidden="" th:text="${session.account}"></span>
+</body>
+</html>

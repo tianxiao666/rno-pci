@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="UTF-8"?>
+ 
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hgicreate.rno.mapper.G4AzimuthCalcMapper">
+	
+	<select id="get4GAzimuthCalcTaskCount" parameterType="map" resultType="long">
+	select count(*) from RNO_MS_4G_AZIMUTH_JOB sjob left join rno_ms_job job on job.job_id = sjob.job_id
+		<trim prefix="where" prefixOverrides="and | or">
+			<if test="isMine=='on'">
+				and job.creator=#{account}
+			</if>
+			<if test="cityId!=''">
+				and sjob.city_id =#{cityId}
+			</if>
+			<if test="taskName!=''">
+				and job.job_name like CONCAT(CONCAT('%',#{taskName}),'%')
+			</if>
+			<if test="taskStatus!='ALL'">
+				<if test="taskStatus=='LaunchedOrRunning'">
+					and (job.job_running_status = 'Launched'
+					or job.job_running_status ='Running')
+				</if>
+				<if test="taskStatus=='Succeded'">
+					and job.job_running_status = 'Succeded'
+				</if>
+				<if test="taskStatus=='Fail'">
+					and job.job_running_status = 'Fail'
+				</if>
+				<if test="taskStatus=='Initiate'">
+					and job.job_running_status = 'Waiting'
+				</if>
+				<if test="taskStatus=='Stopping'">
+					and job.job_running_status = 'Stopping'
+				</if>
+				<if test="taskStatus=='Stopped'">
+					and job.job_running_status = 'Stopped'
+				</if>
+				<!-- <if test="taskStatus!= 'LaunchedOrRunning'">
+					and job.job_running_status =#{taskStatus}
+				</if> -->
+			</if>
+			<if test="meaTime!=''">
+				and sjob.beg_mea_time &lt;= to_date(#{meaTime},'yyyy-MM-dd')
+				and sjob.end_mea_time &gt;= to_date(#{meaTime},'yyyy-MM-dd')
+			</if>
+			<if test="startSubmitTime!=''">
+				and job.create_time &gt;= to_date(#{startSubmitTime},'yyyy-MM-dd
+				HH24:mi:ss')
+			</if>
+			<if test="endSubmitTime!=''">
+				and job.create_time &lt;= to_date(#{endSubmitTime},'yyyy-MM-dd
+				HH24:mi:ss')
+			</if>
+		</trim>
+	</select>
+
+	<select id="query4GAzimuthCalcTaskByPage" parameterType="map" resultType="map">
+	select * from (select t1.*,rownum as rn
+	from ( select sjob.job_id as job_id,
+	job.job_name as job_name,
+	job.job_running_status as job_running_status,
+	to_char(sjob.beg_mea_time,'yyyy-MM-dd HH24:mi:ss') as beg_mea_time,
+	to_char(sjob.end_mea_time,'yyyy-MM-dd HH24:mi:ss') as end_mea_time,
+	sjob.dl_file_name as dl_file_name,
+	sjob.rd_file_name as rd_file_name,
+	sjob.result_dir as result_dir,
+	sjob.mr_job_id as mr_job_id,
+	to_char(job.launch_time,'yyyy-MM-dd HH24:mi:ss') as launch_time,
+	to_char(job.complete_time,'yyyy-MM-dd HH24:mi:ss') as complete_time
+	from RNO_MS_4G_AZIMUTH_JOB sjob
+	left join rno_ms_job job on job.job_id = sjob.job_id
+	<trim prefix="where" prefixOverrides="and | or">
+		<if test="isMine=='on'">
+			and job.creator=#{account}
+		</if>
+		<if test="cityId!=''">
+			and sjob.city_id =#{cityId}
+		</if>
+		<if test="taskName!=''">
+			and job.job_name like CONCAT(CONCAT('%',#{taskName}),'%')
+		</if>
+		<if test="taskStatus!='ALL'">
+			<if test="taskStatus=='LaunchedOrRunning'">
+				and (job.job_running_status = 'Launched'
+				or job.job_running_status ='Running')
+			</if>
+			<if test="taskStatus=='Succeded'">
+					and job.job_running_status = 'Succeded'
+				</if>
+				<if test="taskStatus=='Fail'">
+					and job.job_running_status = 'Fail'
+				</if>
+				<if test="taskStatus=='Initiate'">
+					and job.job_running_status = 'Waiting'
+				</if>
+				<if test="taskStatus=='Stopping'">
+					and job.job_running_status = 'Stopping'
+				</if>
+				<if test="taskStatus=='Stopped'">
+					and job.job_running_status = 'Stopped'
+				</if>
+			<!-- <if test="taskStatus!= 'LaunchedOrRunning'">
+				and job.job_running_status =#{taskStatus}
+			</if> -->
+		</if>
+		<if test="meaTime!=''">
+			and sjob.beg_mea_time &lt;= to_date(#{meaTime},'yyyy-MM-dd')
+			and sjob.end_mea_time &gt;= to_date(#{meaTime},'yyyy-MM-dd')
+		</if>
+		<if test="startSubmitTime!=''">
+			and job.create_time &gt;= to_date(#{startSubmitTime},'yyyy-MM-dd
+			HH24:mi:ss')
+		</if>
+		<if test="endSubmitTime!=''">
+			and job.create_time &lt;= to_date(#{endSubmitTime},'yyyy-MM-dd
+			HH24:mi:ss')
+		</if>
+	</trim>
+	order by sjob.create_time desc nulls last) t1
+	where rownum &lt;= (${cnt} + ${startIndex}) ) t2 where t2.rn &gt;
+	${startIndex}
+	</select>
+	<resultMap type="JobProfile" id="table_RnoJob">
+		<result property="jobId" column="JOB_ID" />
+		<result property="jobName" column="JOB_NAME" />
+	</resultMap>
+	<select id="getCityNameByCityId" parameterType="long" resultType="String">
+	    SELECT name FROM SYS_AREA WHERE AREA_ID=#{_parameter}
+	</select>
+	
+	<select id="query4GAzimuthJobRecByJobId" parameterType="long" resultType="map">
+	   select * from RNO_MS_4G_AZIMUTH_JOB where JOB_ID =#{jobId} order by CREATE_TIME desc
+	</select>
+	<select id="queryNetWorkCoverResByJobId" parameterType="long" resultType="map">
+		select  CELL_ID "cellId",CELL_NAME "cellName",CUR_AZIMUTH "oldAzimuth",CAL_AZIMUTH "newAzimuth",DIFF_AZIMUTH "azimuthDiff" from RNO_MS_NETWORK_CONVER_RES where JOB_ID =#{jobId}
+	</select>
+	
+	<update id="updatePciPlanWorkStatus" parameterType="map">
+	   update RNO_MS_4G_AZIMUTH_JOB t 
+	   set t.finish_state=#{jobStatus} 
+	   where t.job_id=#{jobId}
+	</update>
+	<select id="addMapReduceJobId" parameterType="map">
+	   update ${table} 
+	   set MR_JOB_ID=#{mrJobId} 
+	   WHERE JOB_ID=#{jobId}
+	</select>
+	
+	<select id="getJobNameByJobId" parameterType="long" resultMap="table_RnoJob">
+	    select job_id,job_name
+	    from rno_ms_job where job_id = #{jobId}
+    </select>
+   
+    <update id="updateJobNameById" parameterType="map">
+        update rno_ms_job  set job_name=#{jobName} where job_id=#{jobId}
+    </update>
+    <select id="getTaskInfoByJobId" parameterType="long" resultType="map">
+        select * from RNO_MS_4G_AZIMUTH_JOB where job_id=#{jobId}
+    </select>
+    <select id="getLteCellInfoByCellId" parameterType="long" resultType="map">
+        select t1.business_cell_id cell,t1.cell_name name,t1.pci,t1.earfcn,t2.business_enodeb_id ENODEB_ID 
+        from rno_lte_cell t1 
+        left join rno_lte_enodeb t2 
+        on t1.enodeb_id = t2.enodeb_id  
+        where t1.area_id =#{cityId}
+    </select>
+    
+    <select id="queryCellAzimuthByAreaStr" parameterType="string" resultType="map">
+    select business_cell_id as cell_id,azimuth from rno_lte_cell where area_id in(${areaIdStr})
+    </select>
+    <select id="queryCellBandTypeByAreaStr" parameterType="string" resultType="map">
+    select business_cell_id as cell_id, band_type from rno_lte_cell where area_id in(${areaIdStr})
+    </select>
+	<insert id="addNetworkCoverResBatch"  parameterType="list">
+		insert into RNO_MS_NETWORK_CONVER_RES (RES_ID,JOB_ID,CELL_ID,CELL_NAME,CUR_AZIMUTH,CAL_AZIMUTH,DIFF_AZIMUTH)
+		SELECT SEQ_NETWORK_COVER_RES.NEXTVAL  RES_ID,A.*
+		FROM(
+		<foreach collection="list" item="item" index="index" separator=" union all ">
+			select #{item.job_id,jdbcType=NUMERIC} JOB_ID,#{item.cell_id,jdbcType=VARCHAR} CELL_ID,#{item.cell_name,jdbcType=VARCHAR} CELL_NAME,#{item.cur_azimuth,jdbcType=NUMERIC} CUR_AZIMUTH,#{item.cal_azimuth,jdbcType=NUMERIC} CAL_AZIMUTH,#{item.diff_azimuth,jdbcType=NUMERIC} DIFF_AZIMUTH from dual
+		</foreach>
+		) A
+	</insert>
+</mapper>

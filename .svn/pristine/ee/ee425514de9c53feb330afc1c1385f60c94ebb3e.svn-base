@@ -1,0 +1,8 @@
+server.port=20005
+spring.profiles.active=dev
+logging.level.com.hgicreate.rno=debug
+
+mybatis.oracle.mapper-locations=com/hgicreate/rno/mapper/oracle/*.xml
+
+mybatis.spark.mapper-locations=com/hgicreate/rno/mapper/spark/*.xml
+

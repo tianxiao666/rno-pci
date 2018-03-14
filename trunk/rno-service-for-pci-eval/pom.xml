@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<groupId>com.hgicreate.rno</groupId>
+	<artifactId>service-for-pci-eval</artifactId>
+	<version>1.0-DEV</version>
+	<packaging>jar</packaging>
+
+	<name>rno-service-for-pci-eval</name>
+	<description>Demo project for the Service of Pci Evaluate Microservices</description>
+
+	<parent>
+		<groupId>org.springframework.boot</groupId>
+		<artifactId>spring-boot-starter-parent</artifactId>
+		<version>1.4.2.RELEASE</version>
+		<relativePath /> <!-- lookup parent from repository -->
+	</parent>
+
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+		<java.version>1.8</java.version>
+	</properties>
+
+	<dependencies>
+		<dependency>
+			<groupId>javax.servlet</groupId>
+			<artifactId>javax.servlet-api</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-web</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.oracle</groupId>
+			<artifactId>ojdbc7</artifactId>
+			<version>12.1.0.1</version>
+		</dependency>
+		<dependency>
+			<groupId>org.mybatis.spring.boot</groupId>
+			<artifactId>mybatis-spring-boot-starter</artifactId>
+			<version>1.1.1</version>
+		</dependency>
+		<dependency>
+			<groupId>com.github.timveil</groupId>
+			<artifactId>hive-jdbc-uber</artifactId>
+			<version>1.1-2.5.3</version>
+		</dependency>
+		<!-- <dependency> <groupId>org.apache.hive</groupId> <artifactId>hive-jdbc</artifactId> 
+			<version>1.1.0-cdh5.9.0</version> <exclusions> <exclusion> <groupId>org.eclipse.jetty.aggregate</groupId> 
+			<artifactId>*</artifactId> </exclusion> <exclusion> <artifactId>slf4j-log4j12</artifactId> 
+			<groupId>org.slf4j</groupId> </exclusion> <exclusion> <groupId>javax.servlet</groupId> 
+			<artifactId>servlet-api</artifactId> </exclusion> </exclusions> </dependency> 
+			<dependency> <groupId>org.apache.hadoop</groupId> <artifactId>hadoop-client</artifactId> 
+			<version>2.6.0-cdh5.9.0</version> <exclusions> <exclusion> <artifactId>slf4j-log4j12</artifactId> 
+			<groupId>org.slf4j</groupId> </exclusion> <exclusion> <groupId>javax.servlet</groupId> 
+			<artifactId>servlet-api</artifactId> </exclusion> </exclusions> </dependency> -->
+
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-test</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-configuration-processor</artifactId>
+		</dependency>
+	</dependencies>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-maven-plugin</artifactId>
+			</plugin>
+		</plugins>
+	</build>
+
+
+</project>

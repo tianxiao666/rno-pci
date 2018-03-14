@@ -1,0 +1,17 @@
+@charset "utf-8";
+
+.taskInfoTab {
+    width: 600px;
+    border: 1px solid gray;
+    margin: 4px auto 0;
+}
+
+.taskInfoTab td {
+    padding: 10px;
+}
+
+.errorTips {
+    color: red;
+    width: 100px;
+    font-family: 华文中宋, serif;
+}

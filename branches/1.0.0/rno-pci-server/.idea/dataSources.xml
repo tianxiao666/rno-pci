@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="DataSourceManagerImpl" format="xml" multifile-model="true">
+    <data-source source="LOCAL" name="Greenplum - gpadmin@192.168.9.66" uuid="f265d4c8-e0d8-4f04-880c-978844b08f7c">
+      <driver-ref>78ed99a3-97a0-4bb4-b42c-65b36d499998</driver-ref>
+      <synchronize>true</synchronize>
+      <jdbc-driver>org.postgresql.Driver</jdbc-driver>
+      <jdbc-url>jdbc:postgresql://192.168.9.66:1949/gpadmin</jdbc-url>
+    </data-source>
+    <data-source source="LOCAL" name="rno_pci@192.168.9.66" uuid="7bafc9d5-a1ed-4525-90c8-bd68bd06cadb">
+      <driver-ref>postgresql</driver-ref>
+      <synchronize>true</synchronize>
+      <jdbc-driver>org.postgresql.Driver</jdbc-driver>
+      <jdbc-url>jdbc:postgresql://192.168.9.66:5432/rno_pci</jdbc-url>
+      <driver-properties>
+        <property name="ApplicationName" value="DataGrip" />
+      </driver-properties>
+    </data-source>
+  </component>
+</project>

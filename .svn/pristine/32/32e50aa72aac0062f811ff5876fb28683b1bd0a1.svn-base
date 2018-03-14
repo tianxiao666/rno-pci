@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+ 
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.iscreate.rnointerfermatrix.mapper.oracle.OracleMapper">
+	<!-- 配置映射字段 -->
+	<insert id="addReport" parameterType="com.iscreate.rnointerfermatrix.model.Report">
+		<selectKey keyProperty="reportId" resultType="long" order="BEFORE">
+			SELECT seq_rno_ms_job_report.NEXTVAL FROM DUAL
+		</selectKey>
+		insert into rno_ms_job_report
+		  (report_id,
+		   job_id,
+		   stage,
+		   beg_time,
+		   end_time,
+		   state,
+		   report_type,
+		   att_msg)
+		values
+		  (#{reportId},
+		   #{jobId},
+		   #{stage},
+		   #{begTime},
+		   #{endTime},
+		   #{finishState},
+		   #{reportType},
+		   #{attMsg})
+	</insert>
+</mapper>
+ 

@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>PCI优化与天线评估系统</title>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0,  maximum-scale=1">
+
+    <script src="../static/lib/jquery/v3.1.1-dist/jquery-3.1.1.js"
+            th:src="@{lib/jquery/v3.1.1-dist/jquery-3.1.1.js}"></script>
+
+    <link rel="stylesheet" href="../static/lib/bootstrap/v3.3.7-dist/css/bootstrap.css"
+          th:href="@{lib/bootstrap/v3.3.7-dist/css/bootstrap.css}">
+
+    <script src="../static/lib/bootstrap/v3.3.7-dist/js/bootstrap.js"
+            th:src="@{lib/bootstrap/v3.3.7-dist/js/bootstrap.js}"></script>
+
+
+    <link rel="stylesheet" href="../static/lib/Font-Awesome/v4.7.0-dist/css/font-awesome.css"
+          th:href="@{lib/Font-Awesome/v4.7.0-dist/css/font-awesome.css}">
+
+    <link rel="stylesheet"  href="../static/lib/icofont/v1.0.0-beta/css/icofont.css"
+          th:href="@{lib/icofont/v1.0.0-beta/css/icofont.css}">
+    <!--自定义-->
+    <link rel="stylesheet" href="../static/css/style-footer.css"  th:href="@{css/style-footer.css}">
+    <script src="../static/js/extend.js" th:src="@{js/extend.js}"></script>
+
+
+    <link rel="stylesheet"  href="../static/lib/bootstrap/start-bootstrap/css/sb-admin-2.css"
+          th:href="@{lib/bootstrap/start-bootstrap/css/sb-admin-2.css}">
+
+    <script src="../static/lib/bootstrap/start-bootstrap/js/sb-admin-2.js"
+            th:src="@{lib/bootstrap/start-bootstrap/js/sb-admin-2.js}"></script>
+
+    <script language="JavaScript">
+        if (self != top) {
+            // 页面不在iframe中时处理
+            location.href = "about:blank";
+        }
+        host_ip = "http://192.168.6.40:22000";
+        //host_ip = "http://localhost:22000";
+    </script>
+
+</head>
+<body>
+<div id="pageLoading"></div>
+
+<header>
+    <!-- Navigation -->
+    <nav class="navbar navbar-default navbar-fixed-top" role="navigation" style="margin-bottom: 0">
+        <div class="navbar-header">
+            <a class="navbar-brand" style="font-size: 25px">广东移动PCI优化与天线评估系统</a>
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+
+            <div class="menu-toggler sidebar-toggler">
+
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+
+            </div>
+
+
+            <ul class="nav navbar-top-links navbar-right">
+                <!-- /.dropdown -->
+                <li class="dropdown">
+                    <a class="dropdown-toggle" data-toggle="dropdown" href="#" >
+                        <i class="fa fa-user fa-fw"></i> <span id="userName">广州网优</span> <i class="fa fa-caret-down"></i>
+                    </a>
+                    <ul class="dropdown-menu dropdown-user">
+                        <li><a href="#"><i class="fa fa-user fa-fw"></i> 用户信息</a>
+                        </li>
+                        <li><a href="#"><i class="fa fa-gear fa-fw"></i> 设置</a>
+                        </li>
+                        <li class="divider"></li>
+                        <li><a th:href="@{/login}"><i class="fa fa-sign-out fa-fw"></i> 注销</a>
+                        </li>
+                    </ul>
+                    <!-- /.dropdown-user -->
+                </li>
+                <!-- /.dropdown -->
+            </ul>
+            <!-- /.navbar-top-links -->
+        </div>
+        <!-- /.navbar-header -->
+    </nav>
+</header>
+
+<div id="wrapper">
+    <!-- Navigation --><!--SideBar侧边栏-->
+    <nav role="navigation" style="margin-top: 51px ">
+        <div class="navbar sidebar" role="navigation">
+            <div class="sidebar-nav navbar-collapse" id="sidebar-area">
+                <ul class="nav" id="sidebar">
+                    <li>
+                        <a href="#" class="dropdown-collapse"><i class="fa fa-wrench fa-fw"></i> <span
+                                class="side-menu-title">PCI优化</span><span class="fa arrow"></span></a>
+                        <ul class="nav nav-second-level collapse in">
+                            <li>
+                                <script>
+                                    document.write("<a href=\"javascript:bs.addTabs({id:'3',title:'小区PCI评估',close:'true',url:'/"+host_ip+"/?msId=1&account=liu.yp@iscreate.com'});\"><i class=\"icofont icofont-site-map\"></i> 小区PCI评估</a>");
+                                </script>
+                            </li>
+                            <li>
+
+                                <script>
+                                    document.write("<a href=\"javascript:bs.addTabs({id:'2',title:'干扰矩阵计算',close:'true',url:'/"+host_ip+"/?msId=2&account=liu.yp@iscreate.com'});\"> <i class=\"icofont icofont-server\"></i> 干扰矩阵计算</a>");
+                                </script>
+                            </li>
+                            <li>
+
+                                <script>
+                                    document.write("<a href=\"javascript:bs.addTabs({id:'6',title:'区域PCI翻频',close:'true',url:'/"+host_ip+"/?msId=3&account=liu.yp@iscreate.com'});\"><i class=\"icofont icofont-settings\"></i> 区域PCI翻频</a>");
+                                </script>
+                            </li>
+                        </ul>
+                    </li>
+                    <li>
+                        <a href="#" class="dropdown-collapse"><i class="fa fa-bar-chart-o fa-fw"></i> <span
+                                class="side-menu-title">LTE动态分析</span><span class="fa arrow"></span></a>
+                        <ul class="nav nav-second-level">
+                            <li>
+
+                                <script>
+                                    document.write("<a href=\"javascript:bs.addTabs({id:'4',title:'LTE动态覆盖图',close:'true',url:'/"+host_ip+"/?msId=4&account=liu.yp@iscreate.com'});\"><i class=\"icofont icofont-pixels\"></i> LTE动态覆盖图</a>");
+                                </script>
+                            </li>
+                            <li>
+                                <script>
+                                    document.write("<a href=\"javascript:bs.addTabs({id:'5',title:'LTE网络结构分析',close:'true',url:'/"+host_ip+"/?msId=5&account=liu.yp@iscreate.com'});\"><i class=\"icofont icofont-network\"></i> LTE网络结构分析</a>");
+                                </script>
+                            </li>
+                        </ul>
+                    </li>
+                    <li>
+                        <a href="#" class="dropdown-collapse"><i class="fa fa-sitemap fa-fw"></i> <span
+                                class="side-menu-title">LTE结构优化</span><span class="fa arrow"></span></a>
+                        <ul class="nav nav-second-level">
+                            <li>
+                                <script>
+                                    document.write("<a href=\"javascript:bs.addTabs({id:'7',title:'LTE网络结构优化',close:'true',url:'/"+host_ip+"/?msId=6&account=liu.yp@iscreate.com'});\"><i class=\"icofont icofont-network-tower\"></i> LTE网络结构优化</a>");
+                                </script>
+                            </li>
+                            <li>
+                                <script>
+                                    document.write("<a href=\"javascript:bs.addTabs({id:'8',title:'天线方位角评估',close:'true',url:'/"+host_ip+"/?msId=7&account=liu.yp@iscreate.com'});\"><i class=\"icofont icofont-degrees\"></i> 天线方位角评估</a>");
+                                </script>
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+            <!-- /.sidebar-collapse -->
+        </div>
+        <!-- /.navbar-static-side -->
+    </nav>
+
+
+    <!-- Page Content -->
+    <div id="page-wrapper">
+
+        <div class="page-content">
+
+            <div class="row" style="margin-bottom: 0">
+                <div class="col-lg-12">
+                    <div style="margin-left: -30px;margin-right:-30px">
+                    <ul class="closeable-tabs nav nav-tabs">
+
+                    </ul>
+                    </div>
+                    <div class="tab-content" style="height:758px;margin-left: -30px;margin-right:-30px" >
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+<!-- /#page-wrapper -->
+<!--BEGIN FOOTER-->
+<div id="footer">
+    <div class="copyright">2016 © 广东海格怡创科技有限公司</div>
+</div>
+<!--END FOOTER-->
+</body>
+</html>

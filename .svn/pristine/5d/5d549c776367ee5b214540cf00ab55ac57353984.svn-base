@@ -1,0 +1,89 @@
+{
+  "properties": [
+    {
+      "name": "rno.run-mode",
+      "type": "java.lang.String",
+      "description": "RNO 微服务的运行模式，值可以是 always, scheduler, never."
+    },
+    {
+      "name": "rno.scheduler.fixed-delay",
+      "type": "java.lang.String",
+      "description": "任务执行的延迟时间."
+    },
+    {
+      "name": "datasource.oracle.url",
+      "type": "java.lang.String",
+      "description": "Description for datasource.oracle.url."
+    },
+    {
+      "name": "datasource.oracle.username",
+      "type": "java.lang.String",
+      "description": "Description for datasource.oracle.username."
+    },
+    {
+      "name": "datasource.oracle.password",
+      "type": "java.lang.String",
+      "description": "Description for datasource.oracle.password."
+    },
+    {
+      "name": "datasource.oracle.driverClassName",
+      "type": "java.lang.String",
+      "description": "Description for datasource.oracle.driverClassName."
+    },
+    {
+      "name": "datasource.spark.url",
+      "type": "java.lang.String",
+      "description": "Description for datasource.spark.url."
+    },
+    {
+      "name": "datasource.spark.username",
+      "type": "java.lang.String",
+      "description": "Description for datasource.spark.username."
+    },
+    {
+      "name": "datasource.spark.password",
+      "type": "java.lang.String",
+      "description": "Description for datasource.spark.password."
+    },
+    {
+      "name": "datasource.spark.driverClassName",
+      "type": "java.lang.String",
+      "description": "Description for datasource.spark.driverClassName."
+    },
+    {
+      "name": "mybatis.oracle.mapper-locations",
+      "type": "java.lang.String",
+      "description": "Description for mybatis.oracle.mapper-locations."
+    },
+    {
+      "name": "mybatis.oracle.type-aliases-package",
+      "type": "java.lang.String",
+      "description": "Description for mybatis.oracle.type-aliases-package."
+    },
+    {
+      "name": "mybatis.oracle.configuration.mapUnderscoreToCamelCase",
+      "type": "java.lang.String",
+      "description": "Description for mybatis.oracle.configuration.mapUnderscoreToCamelCase."
+    },
+    {
+      "name": "mybatis.spark.mapper-locations",
+      "type": "java.lang.String",
+      "description": "Description for mybatis.spark.mapper-locations."
+    },
+    {
+      "name": "mybatis.spark.type-aliases-package",
+      "type": "java.lang.String",
+      "description": "Description for mybatis.spark.type-aliases-package."
+    },
+    {
+      "name": "mybatis.spark.configuration.mapUnderscoreToCamelCase",
+      "type": "java.lang.String",
+      "description": "Description for mybatis.spark.configuration.mapUnderscoreToCamelCase."
+    },
+    {
+      "name": "rno.batch",
+      "type": "java.lang.String",
+      "description": "Description for rno.batch."
+    }
+  ]
+}

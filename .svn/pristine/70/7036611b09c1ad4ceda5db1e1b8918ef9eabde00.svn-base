@@ -1,0 +1,250 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hgicreate.rno.ltestrucanlsservice.mapper.oracle.OracleMapper">
+
+    <insert id="batchInsertOverlapCoverResult2" parameterType="map">
+        <foreach open="BEGIN" close=";END ;" collection="list" item="item" index="index" separator=";">
+            insert into RNO_MS_LTE_STRUC_OLC_RES
+            (RECORD_ID,JOB_ID,CELL_ID,TOTAL_CNT,SC_GT105_GT0_CNT,SC_GT110_GT0_CNT,SC_GT105_GT0_PER,SC_GT110_GT0_PER,SC_GT110_NC_SC_GT6_GT3_CNT,SC_GT110_NC_SC_GT6_GT4_CNT,SC_GT110_NC_SC_GT6_GT5_CNT,SC_GT110_NC_SC_GT6_GT6_CNT,SC_GT110_NC_SC_GT6_GT3_PER,SC_GT110_NC_SC_GT6_GT4_PER,SC_GT110_NC_SC_GT6_GT5_PER,SC_GT110_NC_SC_GT6_GT6_PER,SC_GT110_NC_SC_GT10_GT3_CNT,SC_GT110_NC_SC_GT10_GT4_CNT,SC_GT110_NC_SC_GT10_GT5_CNT,SC_GT110_NC_SC_GT10_GT6_CNT,SC_GT110_NC_SC_GT10_GT3_PER,SC_GT110_NC_SC_GT10_GT4_PER,SC_GT110_NC_SC_GT10_GT5_PER,SC_GT110_NC_SC_GT10_GT6_PER,SC_GT110_EQ1_CNT,SC_GT110_EQ2_CNT,SC_GT110_EQ3_CNT,SC_GT110_EQ4_CNT,SC_GT110_EQ5_CNT,SC_GT110_EQ6_CNT,SC_GT110_EQ7_CNT,SC_GT110_EQ8_CNT,SC_GT110_EQ9_CNT)
+            VALUES
+            ( SEQ_RNO_MS_LTE_STRUC_OLC_RES.nextval,
+            #{jobId},
+            #{item.cellId},
+            #{item.totalCnt},
+            #{item.scGt105Gt0Cnt},
+            #{item.scGt105Gt0Per},
+            #{item.scGt110Gt0Cnt},
+            #{item.scGt110Gt0Per},
+            #{item.scGt110NcScGt6Gt3Cnt},
+            #{item.scGt110NcScGt6Gt3Per},
+            #{item.scGt110NcScGt6Gt4Cnt},
+            #{item.scGt110NcScGt6Gt4Per},
+            #{item.scGt110NcScGt6Gt5Cnt},
+            #{item.scGt110NcScGt6Gt5Per},
+            #{item.scGt110NcScGt6Gt6Cnt},
+            #{item.scGt110NcScGt6Gt6Per},
+            #{item.scGt110NcScGt10Gt3Cnt},
+            #{item.scGt110NcScGt10Gt3Per},
+            #{item.scGt110NcScGt10Gt4Cnt},
+            #{item.scGt110NcScGt10Gt4Per},
+            #{item.scGt110NcScGt10Gt5Cnt},
+            #{item.scGt110NcScGt10Gt5Per},
+            #{item.scGt110NcScGt10Gt6Cnt},
+            #{item.scGt110NcScGt10Gt6Per},
+            #{item.scGt110Eq1Cnt},
+            #{item.scGt110Eq2Cnt},
+            #{item.scGt110Eq3Cnt},
+            #{item.scGt110Eq4Cnt},
+            #{item.scGt110Eq5Cnt},
+            #{item.scGt110Eq6Cnt},
+            #{item.scGt110Eq7Cnt},
+            #{item.scGt110Eq8Cnt},
+            #{item.scGt110Eq9Cnt} )
+        </foreach>
+    </insert>
+
+    <insert id="batchInsertOverlapCoverResult" parameterType="map">
+        insert into RNO_MS_LTE_STRUC_OLC_RES
+        (RECORD_ID,JOB_ID,CELL_ID,TOTAL_CNT,SC_GT105_GT0_CNT,SC_GT110_GT0_CNT,SC_GT105_GT0_PER,SC_GT110_GT0_PER,SC_GT110_NC_SC_GT6_GT3_CNT,SC_GT110_NC_SC_GT6_GT4_CNT,SC_GT110_NC_SC_GT6_GT5_CNT,SC_GT110_NC_SC_GT6_GT6_CNT,SC_GT110_NC_SC_GT6_GT3_PER,SC_GT110_NC_SC_GT6_GT4_PER,SC_GT110_NC_SC_GT6_GT5_PER,SC_GT110_NC_SC_GT6_GT6_PER,SC_GT110_NC_SC_GT10_GT3_CNT,SC_GT110_NC_SC_GT10_GT4_CNT,SC_GT110_NC_SC_GT10_GT5_CNT,SC_GT110_NC_SC_GT10_GT6_CNT,SC_GT110_NC_SC_GT10_GT3_PER,SC_GT110_NC_SC_GT10_GT4_PER,SC_GT110_NC_SC_GT10_GT5_PER,SC_GT110_NC_SC_GT10_GT6_PER,SC_GT110_EQ1_CNT,SC_GT110_EQ2_CNT,SC_GT110_EQ3_CNT,SC_GT110_EQ4_CNT,SC_GT110_EQ5_CNT,SC_GT110_EQ6_CNT,SC_GT110_EQ7_CNT,SC_GT110_EQ8_CNT,SC_GT110_EQ9_CNT)
+        (select SEQ_RNO_MS_LTE_STRUC_OLC_RES.nextval, #{jobId}, t.* from
+        <foreach open="(" close=")" collection="list" item="item" index="index" separator="UNION ALL">
+            select #{item.cellId},
+            #{item.totalCnt},
+            #{item.scGt105Gt0Cnt},
+            #{item.scGt105Gt0Per},
+            #{item.scGt110Gt0Cnt},
+            #{item.scGt110Gt0Per},
+            #{item.scGt110NcScGt6Gt3Cnt},
+            #{item.scGt110NcScGt6Gt3Per},
+            #{item.scGt110NcScGt6Gt4Cnt},
+            #{item.scGt110NcScGt6Gt4Per},
+            #{item.scGt110NcScGt6Gt5Cnt},
+            #{item.scGt110NcScGt6Gt5Per},
+            #{item.scGt110NcScGt6Gt6Cnt},
+            #{item.scGt110NcScGt6Gt6Per},
+            #{item.scGt110NcScGt10Gt3Cnt},
+            #{item.scGt110NcScGt10Gt3Per},
+            #{item.scGt110NcScGt10Gt4Cnt},
+            #{item.scGt110NcScGt10Gt4Per},
+            #{item.scGt110NcScGt10Gt5Cnt},
+            #{item.scGt110NcScGt10Gt5Per},
+            #{item.scGt110NcScGt10Gt6Cnt},
+            #{item.scGt110NcScGt10Gt6Per},
+            #{item.scGt110Eq1Cnt},
+            #{item.scGt110Eq2Cnt},
+            #{item.scGt110Eq3Cnt},
+            #{item.scGt110Eq4Cnt},
+            #{item.scGt110Eq5Cnt},
+            #{item.scGt110Eq6Cnt},
+            #{item.scGt110Eq7Cnt},
+            #{item.scGt110Eq8Cnt},
+            #{item.scGt110Eq9Cnt} from dual
+        </foreach>
+        t )
+    </insert>
+
+    <select id="queryOverlapCoverResultByJobId" resultType="com.hgicreate.rno.ltestrucanlsservice.model.OverlapCover">
+        SELECT
+            t.cell_id,
+            t.total_cnt,
+            t.sc_gt105_gt0_cnt,
+            t.sc_gt110_gt0_cnt,
+            t.sc_gt105_gt0_per,
+            t.sc_gt110_gt0_per,
+            t.sc_gt110_nc_sc_gt6_gt3_cnt,
+            t.sc_gt110_nc_sc_gt6_gt4_cnt,
+            t.sc_gt110_nc_sc_gt6_gt5_cnt,
+            t.sc_gt110_nc_sc_gt6_gt6_cnt,
+            t.sc_gt110_nc_sc_gt6_gt3_per,
+            t.sc_gt110_nc_sc_gt6_gt4_per,
+            t.sc_gt110_nc_sc_gt6_gt5_per,
+            t.sc_gt110_nc_sc_gt6_gt6_per,
+            t.sc_gt110_nc_sc_gt10_gt3_cnt,
+            t.sc_gt110_nc_sc_gt10_gt4_cnt,
+            t.sc_gt110_nc_sc_gt10_gt5_cnt,
+            t.sc_gt110_nc_sc_gt10_gt6_cnt,
+            t.sc_gt110_nc_sc_gt10_gt3_per,
+            t.sc_gt110_nc_sc_gt10_gt4_per,
+            t.sc_gt110_nc_sc_gt10_gt5_per,
+            t.sc_gt110_nc_sc_gt10_gt6_per,
+            t.sc_gt110_eq1_cnt,
+            t.sc_gt110_eq2_cnt,
+            t.sc_gt110_eq3_cnt,
+            t.sc_gt110_eq4_cnt,
+            t.sc_gt110_eq5_cnt,
+            t.sc_gt110_eq6_cnt,
+            t.sc_gt110_eq7_cnt,
+            t.sc_gt110_eq8_cnt,
+            t.sc_gt110_eq9_cnt
+        FROM RNO_MS_LTE_STRUC_OLC_RES t
+        WHERE t.job_id = #{jobId}
+    </select>
+
+    <insert id="batchInsertOverCoverResult2" parameterType="map">
+        <foreach open="BEGIN" close=";END ;" collection="list" item="item" index="index" separator=";">
+            insert into RNO_MS_LTE_STRUC_OC_RES
+            (RECORD_ID, JOB_ID, CELL_ID, CELL_NAME, CELL_PCI, CELL_EARFCN, CELL_LON, CELL_LAT, STATION_SPACE, NCELL_ID, NCELL_NAME, NCELL_PCI, NCELL_EARFCN, NCELL_LON, NCELL_LAT, NCELL_CNT, TOTAL_CNT, NCELL_PER, DIS)
+            VALUES
+            ( SEQ_RNO_MS_LTE_STRUC_OC_RES.nextval,
+            #{jobId},
+            #{item.cellId},
+            #{item.cellName},
+            #{item.cellPci},
+            #{item.cellEarfcn},
+            #{item.cellLon},
+            #{item.cellLat},
+            #{item.stationSpace},
+            #{item.ncellId},
+            #{item.ncellName},
+            #{item.ncellPci},
+            #{item.ncellEarfcn},
+            #{item.ncellLon},
+            #{item.ncellLat},
+            #{item.ncellCnt},
+            #{item.totalCnt},
+            #{item.ncellPer},
+            #{item.dis} )
+        </foreach>
+    </insert>
+
+    <insert id="batchInsertOverCoverResult" parameterType="map">
+        insert into RNO_MS_LTE_STRUC_OC_RES
+        (RECORD_ID, JOB_ID, CELL_ID, CELL_NAME, CELL_PCI, CELL_EARFCN, CELL_LON, CELL_LAT, STATION_SPACE, NCELL_ID, NCELL_NAME, NCELL_PCI, NCELL_EARFCN, NCELL_LON, NCELL_LAT, NCELL_CNT, TOTAL_CNT, NCELL_PER, DIS)
+        (select SEQ_RNO_MS_LTE_STRUC_OC_RES.nextval, #{jobId}, t.* from
+        <foreach open="(" close=")" collection="list" item="item" index="index" separator="UNION ALL">
+            select #{item.cellId},
+            #{item.cellName},
+            #{item.cellPci},
+            #{item.cellEarfcn},
+            #{item.cellLon},
+            #{item.cellLat},
+            #{item.stationSpace},
+            #{item.ncellId},
+            #{item.ncellName},
+            #{item.ncellPci},
+            #{item.ncellEarfcn},
+            #{item.ncellLon},
+            #{item.ncellLat},
+            #{item.ncellCnt},
+            #{item.totalCnt},
+            #{item.ncellPer},
+            #{item.dis} from dual
+        </foreach>
+        t )
+    </insert>
+
+    <select id="queryOverCoverResultByJobId" resultType="com.hgicreate.rno.ltestrucanlsservice.model.OverCover">
+        SELECT
+            t.CELL_ID,
+            t.CELL_NAME,
+            t.CELL_PCI,
+            t.CELL_EARFCN,
+            t.CELL_LON,
+            t.CELL_LAT,
+            t.STATION_SPACE,
+            t.NCELL_ID,
+            t.NCELL_NAME,
+            t.NCELL_PCI,
+            t.NCELL_EARFCN,
+            t.NCELL_LON,
+            t.NCELL_LAT,
+            t.NCELL_CNT,
+            t.TOTAL_CNT,
+            t.NCELL_PER,
+            t.DIS
+        FROM RNO_MS_LTE_STRUC_OC_RES t
+        WHERE t.job_id = #{jobId}
+    </select>
+
+    <insert id="batchInsertMetricsSummaryResult2" parameterType="map">
+        <foreach open="BEGIN" close=";END ;" collection="list" item="item" index="index" separator=";">
+            insert into RNO_MS_LTE_STRUC_MS_RES
+            (RECORD_ID,JOB_ID,CELL_ID,CELL_NAME,WEAK_FLAG,OVERLAP_FLAG,OVER_CNT,OVER_FLAG,OVER16_CNT,OVER16_FLAG)
+            VALUES
+            ( SEQ_RNO_MS_LTE_STRUC_MS_RES.nextval,
+            #{jobId},
+            #{item.cellId},
+            #{item.cellName},
+            #{item.weakFlag},
+            #{item.overlapFlag},
+            #{item.overCnt},
+            #{item.overFlag},
+            #{item.over16Cnt},
+            #{item.over16Flag} )
+        </foreach>
+    </insert>
+
+    <insert id="batchInsertMetricsSummaryResult" parameterType="map">
+        insert into RNO_MS_LTE_STRUC_MS_RES
+        (RECORD_ID,JOB_ID,CELL_ID,CELL_NAME,WEAK_FLAG,OVERLAP_FLAG,OVER_CNT,OVER_FLAG,OVER16_CNT,OVER16_FLAG)
+        (select SEQ_RNO_MS_LTE_STRUC_MS_RES.nextval, #{jobId}, t.* from
+        <foreach open="(" close=")" collection="list" item="item" index="index" separator="UNION ALL">
+            select #{item.cellId},
+            #{item.cellName},
+            #{item.weakFlag},
+            #{item.overlapFlag},
+            #{item.overCnt},
+            #{item.overFlag},
+            #{item.over16Cnt},
+            #{item.over16Flag} from dual
+        </foreach>
+        t )
+    </insert>
+
+    <select id="queryMetricsSummaryResultByJobId" resultType="com.hgicreate.rno.ltestrucanlsservice.model.MetricsSummary">
+        SELECT
+            t.CELL_ID,
+            t.CELL_NAME,
+            t.WEAK_FLAG,
+            t.OVERLAP_FLAG,
+            t.OVER_CNT,
+            t.OVER_FLAG,
+            t.OVER16_CNT,
+            t.OVER16_FLAG
+        FROM RNO_MS_LTE_STRUC_MS_RES t
+        WHERE t.job_id = #{jobId}
+    </select>
+</mapper>

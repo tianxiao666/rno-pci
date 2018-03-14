@@ -1,0 +1,52 @@
+{"properties": [
+  {
+    "name": "rno.run-mode",
+    "type": "java.lang.String",
+    "description": "RNO 微服务的运行模式，值可以是 always, scheduler, never"
+  },
+  {
+    "name": "scheduler.fixed-delay",
+    "type": "java.lang.String",
+    "description": "任务执行的延迟时间"
+  },
+  {
+    "name": "rno.download-file-path",
+    "type": "java.lang.String",
+    "description": "结果文件下载目录"
+  },
+  {
+    "name": "samefreqcellcoefweight",
+    "type": "java.lang.String",
+    "description": "同频小区相关系数权值"
+  },
+  {
+    "name": "switchratioweight",
+    "type": "java.lang.String",
+    "description": "切换比例权值"
+  },
+  {
+    "name": "dislimit",
+    "type": "java.lang.String",
+    "description": "距离限制"
+  },
+  {
+    "name": "rsrp0minus1weight",
+    "type": "java.lang.String",
+    "description": "邻区减主小区大于-6小于-3的测量报告数 RSRPtimes0- RSRPtimes1 权值"
+  },
+  {
+    "name": "rsrp1weight",
+    "type": "java.lang.String",
+    "description": "邻区减主小区大于-3的测量报告数 RSRPtimes1 权值"
+  },
+  {
+    "name": "minmeasuresum",
+    "type": "java.lang.String",
+    "description": "最少测量次数"
+  },
+  {
+    "name": "mincorrelation",
+    "type": "java.lang.String",
+    "description": "最小关联度"
+  }
+]}

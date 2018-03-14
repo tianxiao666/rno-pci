@@ -1,0 +1,90 @@
+html,body {
+    width: 100%;
+    height: 100%;
+    margin: 0px;
+    background: #EEEEEE;
+}
+
+#map {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    z-index: 0;
+}
+
+.interferDialog {
+    background: #99BBE8;
+    border: 1px solid #99BBE8;
+    border-radius: 5px 5px 5px 5px;
+    font-size: 12px;
+    padding: 5px;
+    position: absolute;
+    z-index: 20;
+}
+
+.interferDialog_header {
+    color: #15428B;
+    font-size: 12px;
+    font-weight: bold;
+    line-height: 15px;
+    padding: 2px 0 4px;
+    position: relative;
+    cursor: move;
+}
+
+.interferDialog_title div {
+    cursor: pointer;
+    display: block;
+    float: right;
+    height: 30px;
+    margin-left: 2px;
+    opacity: 0.8;
+    width: 16px;
+}
+
+.interferDialog_content {
+    border: 1px solid #99BBE8;
+    background-color: #fff;
+    padding: 10px 0;
+}
+
+#DialogBody {
+
+    border-top: none;
+    padding: 0px;
+}
+
+.greystyle-standard .greystyle-standard-red-inter td {
+    border: 1px solid #CCC;
+    padding: 4px;
+    padding-left: 6px;
+    color: #000;
+    line-height: 21px;
+    vertical-align: middle;
+    background: #7CEFF7;
+    height: 20px
+}
+
+
+.queryButton {
+    background-color: #4A8BF4;
+    display: inline-block;
+    height: 25px;
+    vertical-align: middle;
+    width: auto;
+    overflow: visible;
+    font-size: 12px;
+}
+.showCellNameButton {
+    background-color: #4A8BF4;
+    display: inline-block;
+    height: 25px;
+    vertical-align: middle;
+    width: auto;
+    overflow: visible;
+    font-size: 12px;
+}
+.popover-content {
+    min-width: 290px;
+    padding-right: 40px;
+}

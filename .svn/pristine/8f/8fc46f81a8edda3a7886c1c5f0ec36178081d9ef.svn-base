@@ -1,0 +1,23 @@
+# app config
+server.port=58290
+spring.profiles.active=dev
+spring.thymeleaf.mode=HTML
+
+# oracle mybatis config
+mybatis.oracle.mapper-locations=com/hgicreate/rno/lteazimuthevaluation/mapper/oracle/*.xml
+mybatis.oracle.type-aliases-package=com.hgicreate.rno.lteazimuthevaluation.model
+# 自动进行驼峰到下划线的转换。对所有数据库的字段统一采用下划线连接，可以不考虑区分大小写的兼容性问题。
+mybatis.oracle.configuration.mapUnderscoreToCamelCase=true
+
+# spark mybatis config
+mybatis.spark.mapper-locations=com/hgicreate/rno/lteazimuthevaluation/mapper/spark/*.xml
+mybatis.spark.type-aliases-package=com.hgicreate.rno.lteazimuthevaluation.model
+# 自动进行驼峰到下划线的转换。对所有数据库的字段统一采用下划线连接，可以不考虑区分大小写的兼容性问题。
+mybatis.spark.configuration.mapUnderscoreToCamelCase=true
+
+# rno setting
+rno.run-mode=scheduler
+#rno.run-mode=always
+# 2000 be fine
+rno.batch=2000
+rno.scheduler.fixed-delay=100000
